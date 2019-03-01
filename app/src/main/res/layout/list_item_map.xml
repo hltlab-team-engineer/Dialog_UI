@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--  Single List Item Design -->
+<io.github.ponnamkarthik.richlinkpreview.RichLinkView
+    android:id="@+id/richLinkView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+</io.github.ponnamkarthik.richlinkpreview.RichLinkView>
