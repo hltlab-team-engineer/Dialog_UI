@@ -29,5 +29,14 @@ dependencies {
     implementation ('com.dlazaro66.qrcodereaderview:qrcodereaderview:2.0.3@aar'){
         transitive = true
     }
+//    // used for QR code
+    implementation 'com.github.blikoon:QRCodeScanner:0.1.2'
+//    // used for chat view
+    implementation 'com.github.stfalcon:chatkit:0.3.3'
+}
+
+repositories {
+    // used for QR code
+    maven { url 'https://jitpack.io' }
 }
 

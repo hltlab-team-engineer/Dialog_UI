@@ -1,4 +1,4 @@
-package xyz.hiroshifuu.speechapp;
+package xyz.hiroshifuu.speechapp.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,6 +8,9 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import xyz.hiroshifuu.speechapp.R;
+import xyz.hiroshifuu.speechapp.common.SpeechItem;
 
 public class CustomAdapter extends ArrayAdapter<SpeechItem> {
 
