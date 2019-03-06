@@ -49,7 +49,7 @@ import java.util.concurrent.ExecutionException;
 public class SpeechActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
 
     private static final int SERVERPORT = 5588;
-    private static final String SERVER_IP = "172.23.36.178";
+    private static final String SERVER_IP = "3.1.160.222";
     //private TextView status_tv;
     private TextView result_tv;
     private EditText result_tv2;
@@ -138,7 +138,9 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
         listView = findViewById(R.id.list);
         listItems = new ArrayList<SpeechItem>();
         SpeechItem item;
-        item = new SpeechItem("Hello, How can I assist you? Do you have queries related to? \n - Bus route \n -Surrounding places such as shopping malls, hospitals \n -Other rules and regulations", false);
+        item = new SpeechItem("Hello", false);
+ //       item = new SpeechItem("Hello, How can I assist you? Do you have queries related to? \n - Bus route \n -Surrounding places such as shopping malls, hospitals \n -Other rules and regulations", false);
+
         listItems.add(item);
         ArrayAdapter ad = new CustomAdapter(listItems, getApplicationContext());
         listView.setAdapter(ad);
