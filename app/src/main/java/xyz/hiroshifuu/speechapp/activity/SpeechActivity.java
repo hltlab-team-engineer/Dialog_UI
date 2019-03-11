@@ -125,7 +125,7 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
         listView = findViewById(R.id.list);
         listItems = new ArrayList<SpeechItem>();
         SpeechItem item;
-        item = new SpeechItem("Hello, How can I assist you? Do you have queries related to? \n - Bus route \n -Surrounding places such as shopping malls, hospitals \n -Other rules and regulations", false);
+        item = new SpeechItem("Hello, How can I assist you? Do you have queries related to? \n - Bus route \n -Surrounding places such as shopping malls, hospitals \n -Other rules and regulations", false, false);
         listItems.add(item);
         ArrayAdapter ad = new CustomAdapter(listItems, getApplicationContext());
         listView.setAdapter(ad);
@@ -217,7 +217,7 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
 
     private void sendMessage(String text) {
 
-        listItems.add(new SpeechItem(text, true));
+        listItems.add(new SpeechItem(text, true, false));
         ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
         try {
             myClient = new Client(SERVER_IP, SERVERPORT, text);
@@ -232,11 +232,16 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
             e.printStackTrace();
         }
         TTS_speak(qryresp);
-        listItems.add(new SpeechItem(qryresp, false));
+        listItems.add(new SpeechItem(qryresp, false, false));
         ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
 
-        listItems.add(new SpeechItem(qryresp, false));
-        ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
+
+       SpeechItem item = new SpeechItem("https://www.google.com/maps/dir/?api=1&origin=Sembwang&destination=Clementi&travelmode=bus", false, true);
+        //SpeechItem item = new SpeechItem("google.streetview:cbll=46.414382,10.013988", false, true);
+
+
+       listItems.add(item);
+
 
         final ScrollView scrollview = (findViewById(R.id.scrollview));
         scrollview.postDelayed(new Runnable() {
