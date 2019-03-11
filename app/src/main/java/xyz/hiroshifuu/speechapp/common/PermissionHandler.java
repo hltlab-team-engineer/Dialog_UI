@@ -1,4 +1,4 @@
-package xyz.hiroshifuu.speechapp;
+package xyz.hiroshifuu.speechapp.common;
 
 import android.Manifest;
 import android.app.Activity;
@@ -7,6 +7,8 @@ import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
+
+import xyz.hiroshifuu.speechapp.R;
 
 public class PermissionHandler {
 

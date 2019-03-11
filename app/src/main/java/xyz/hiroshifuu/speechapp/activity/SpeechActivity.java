@@ -1,4 +1,4 @@
-package xyz.hiroshifuu.speechapp;
+package xyz.hiroshifuu.speechapp.activity;
 
 import android.Manifest;
 //import android.support.v7.widget.RecyclerView;
@@ -20,7 +20,6 @@ import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -34,17 +33,16 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
+
+import xyz.hiroshifuu.speechapp.common.Client;
+import xyz.hiroshifuu.speechapp.adapter.CustomAdapter;
+import xyz.hiroshifuu.speechapp.common.PermissionHandler;
+import xyz.hiroshifuu.speechapp.R;
+import xyz.hiroshifuu.speechapp.common.SpeechItem;
+import xyz.hiroshifuu.speechapp.common.SpeechRecognizerManager;
 
 public class SpeechActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
 
@@ -80,12 +78,6 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
         setContentView(R.layout.speech);
         findViews();
         setClickListeners();
-
-
-        // responseMessageList = new ArrayList<>();
-        //messageAdapter = new MessageAdapter(responseMessageList, this);
-        // recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false));
-        // recyclerView.setAdapter(Ads);
 
         tts = new TextToSpeech(getApplicationContext(), this);
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//initialise locationManager
@@ -129,18 +121,11 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
             // for ActivityCompat#requestPermissions for more details.
         }
 
-        //else {
-         //   locationManager.requestLocationUpdates("network", 1000, 0, locationListener);
-            // Make a location request. provider can be GPS or network, minTime how often it refresh, minDistance the min distance
-            //configureButton();
-        //}
 
         listView = findViewById(R.id.list);
         listItems = new ArrayList<SpeechItem>();
         SpeechItem item;
-        item = new SpeechItem("Hello", false);
- //       item = new SpeechItem("Hello, How can I assist you? Do you have queries related to? \n - Bus route \n -Surrounding places such as shopping malls, hospitals \n -Other rules and regulations", false);
-
+        item = new SpeechItem("Hello, How can I assist you? Do you have queries related to? \n - Bus route \n -Surrounding places such as shopping malls, hospitals \n -Other rules and regulations", false, false);
         listItems.add(item);
         ArrayAdapter ad = new CustomAdapter(listItems, getApplicationContext());
         listView.setAdapter(ad);
@@ -232,7 +217,7 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
 
     private void sendMessage(String text) {
 
-        listItems.add(new SpeechItem(text, true));
+        listItems.add(new SpeechItem(text, true, false));
         ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
         try {
             myClient = new Client(SERVER_IP, SERVERPORT, text);
@@ -247,8 +232,13 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
             e.printStackTrace();
         }
         TTS_speak(qryresp);
-        listItems.add(new SpeechItem(qryresp, false));
+        listItems.add(new SpeechItem(qryresp, false, false));
         ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
+
+        /* (To be used for google map)
+       SpeechItem item = new SpeechItem("https://www.google.com/maps/dir/?api=1&origin=Sembwang&destination=Clementi&travelmode=bus", false, true);
+       listItems.add(item);
+        */
 
         final ScrollView scrollview = (findViewById(R.id.scrollview));
         scrollview.postDelayed(new Runnable() {
@@ -256,7 +246,7 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
             public void run() {
                 scrollview.fullScroll(ScrollView.FOCUS_DOWN);
             }
-        },500);
+        },100);
     }
 
     private void SetSpeechListener() {
@@ -278,45 +268,6 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
         });
     }
 
-//    public void setResponse(String response) {
-//        result_server_tv.setText(response);
-//        TTS_speak(response);
-//        status_tv.setText(getString(R.string.destroied));
-//        mSpeechManager.destroy();
-//        mSpeechManager = null;
-//        start_listen_btn.setClickable(true);
-//        start_listen_btn.getBackground().setColorFilter(null);
-//    }
-
-    /*private void SetSpeechListener() {
-        mSpeechManager = new SpeechRecognizerManager(this, new SpeechRecognizerManager.onResultsReady() {
-            @Override
-            public void onResults(ArrayList<String> results) {
-                if (results != null && results.size() > 0) {
-//                        StringBuilder sb = new StringBuilder();
-//                        if (results.size() > 5) {
-//                            results = (ArrayList<String>) results.subList(0, 5);
-//                        }
-//                        for (String result : results) {
-//                            sb.append(result).append("\n");
-//                        }
-//                        result_tv.setText(sb.toString());
-                    String res = results.get(0);
-                    result_tv.setText(res);
-//                    TTS_speak(res);
-                    HttpRequest(res);
-                } else {
-                    status_tv.setText(getString(R.string.no_results_found));
-                }
-                status_tv.setText(getString(R.string.destroied));
-                mSpeechManager.destroy();
-                mSpeechManager = null;
-                start_listen_btn.setClickable(true);
-                start_listen_btn.getBackground().setColorFilter(null);
-            }
-        });
-    }*/
-
     @Override
     protected void onPause() {
         if (mSpeechManager != null) {
@@ -336,52 +287,6 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
         super.onResume();
     }
 
-//    private void HttpRequest(String query) {
-//        String url = "http://172.23.67.136:3000/get?query=" + query + "&bus=" + bus.replace(" ", "%20");
-//        RequestQueue queue = Volley.newRequestQueue(this);
-//        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-//                new Response.Listener<String>() {
-//                    @Override
-//                    public void onResponse(String response) {
-//                        result_server_tv.setText("Response is: " + response);
-//                        TTS_speak(response);
-//                    }
-//                },
-//                new Response.ErrorListener() {
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) {
-//                        result_server_tv.setText("That didn't work!");
-//                    }
-//                }
-//        );
-//        queue.add(stringRequest);
-////        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url,
-////                null, new Response.Listener<JSONObject>() {
-////                @Override
-////                public void onResponse(JSONObject response) {
-////                    Log.d("Response JSONObject: ", response.toString());
-////                    String resTTS = "";
-////                    String resRes = "";
-////                    try {
-////                        resTTS = response.getJSONObject("headers").getString("user-agent");
-////                        resRes = response.getJSONObject("args").getString("query");
-////                    } catch (JSONException e) {
-////                        e.printStackTrace();
-////                        Log.d("JSONObject ERR: ", e.toString());
-////                    }
-////                    result_server_tv.setText("Response is: " + resTTS);
-////                    TTS_speak("User-Agent is " + resTTS);
-////                }
-////            }, new Response.ErrorListener() {
-////
-////                @Override
-////                public void onErrorResponse(VolleyError error) {
-////                    result_server_tv.setText("That didn't work!");
-////
-////                }
-////            });
-////        queue.add(jsonObjectRequest);
-//    }
 
     @Override
     public void onInit(int status) {

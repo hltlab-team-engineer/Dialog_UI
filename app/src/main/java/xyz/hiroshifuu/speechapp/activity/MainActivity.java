@@ -1,4 +1,4 @@
-package xyz.hiroshifuu.speechapp;
+package xyz.hiroshifuu.speechapp.activity;
 
 import android.Manifest;
 import android.content.Intent;
@@ -13,6 +13,8 @@ import android.widget.CheckBox;
 import android.widget.Toast;
 
 import com.dlazaro66.qrcodereaderview.QRCodeReaderView;
+
+import xyz.hiroshifuu.speechapp.R;
 
 public class MainActivity extends AppCompatActivity implements QRCodeReaderView.OnQRCodeReadListener {
 
