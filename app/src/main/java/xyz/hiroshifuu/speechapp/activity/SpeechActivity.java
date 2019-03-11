@@ -235,13 +235,10 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
         listItems.add(new SpeechItem(qryresp, false, false));
         ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
 
-
+        /* (To be used for google map)
        SpeechItem item = new SpeechItem("https://www.google.com/maps/dir/?api=1&origin=Sembwang&destination=Clementi&travelmode=bus", false, true);
-        //SpeechItem item = new SpeechItem("google.streetview:cbll=46.414382,10.013988", false, true);
-
-
        listItems.add(item);
-
+        */
 
         final ScrollView scrollview = (findViewById(R.id.scrollview));
         scrollview.postDelayed(new Runnable() {
