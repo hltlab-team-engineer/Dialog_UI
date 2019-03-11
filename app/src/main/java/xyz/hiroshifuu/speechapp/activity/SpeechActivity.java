@@ -235,13 +235,16 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
         listItems.add(new SpeechItem(qryresp, false));
         ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
 
+        listItems.add(new SpeechItem(qryresp, false));
+        ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
+
         final ScrollView scrollview = (findViewById(R.id.scrollview));
         scrollview.postDelayed(new Runnable() {
             @Override
             public void run() {
                 scrollview.fullScroll(ScrollView.FOCUS_DOWN);
             }
-        },500);
+        },100);
     }
 
     private void SetSpeechListener() {
