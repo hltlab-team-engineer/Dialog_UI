@@ -26,50 +26,50 @@
         android:textStyle="italic" /> -->
 
     <!--<TextView-->
-        <!--android:id="@+id/result_tv"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_alignParentTop="true"-->
-        <!--android:layout_centerHorizontal="true"-->
-        <!--android:layout_marginTop="173dp"-->
-        <!--android:text="Demo"-->
-        <!--android:textColor="#1a4067"-->
-        <!--android:textSize="24sp"-->
-        <!--android:textStyle="italic" />-->
+    <!--android:id="@+id/result_tv"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_alignParentTop="true"-->
+    <!--android:layout_centerHorizontal="true"-->
+    <!--android:layout_marginTop="173dp"-->
+    <!--android:text="Demo"-->
+    <!--android:textColor="#1a4067"-->
+    <!--android:textSize="24sp"-->
+    <!--android:textStyle="italic" />-->
 
     <!--<TextView-->
-        <!--android:id="@+id/result_server_tv"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:layout_centerHorizontal="true"-->
-        <!--android:layout_marginBottom="186dp"-->
-        <!--android:text="Server"-->
-        <!--android:textColor="#1a4067"-->
-        <!--android:textSize="24sp"-->
-        <!--android:textStyle="italic" />-->
-    <!--android:layout_marginEnd="355dp"-->
+    <!--android:id="@+id/result_server_tv"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_alignParentBottom="true"-->
+    <!--android:layout_centerHorizontal="true"-->
+    <!--android:layout_marginBottom="186dp"-->
+    <!--android:text="Server"-->
+    <!--android:textColor="#1a4067"-->
+    <!--android:textSize="24sp"-->
+    <!--android:textStyle="italic" />-->
+
     <Button
         android:id="@+id/start_listen_btn"
         android:layout_width="56dp"
         android:layout_height="44dp"
-        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginLeft="16dp"
+
+        android:layout_marginEnd="355dp"
         android:layout_marginBottom="2dp"
         android:background="@drawable/microphone"
         android:textColor="#1a4067"
         android:textStyle="italic" />
 
-    <!--android:layout_marginStart="83dp"-->
     <EditText
         android:id="@+id/result_tv2"
-        android:layout_width="276dp"
+        android:layout_width="290dp"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
         android:layout_marginStart="83dp"
-        android:layout_marginBottom="2dp"
+        android:layout_marginBottom="0dp"
         android:ems="10"
         android:imeOptions="actionSend"
         android:inputType="textPersonName"
@@ -84,7 +84,6 @@
         android:layout_marginTop="-1dp"
         android:layout_marginEnd="0dp"
         android:text="Location" />
-
     <TextView
         android:id="@+id/textView"
         android:layout_width="120dp"
@@ -98,7 +97,7 @@
         android:id="@+id/scrollview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/start_listen_btn"
+        android:layout_above="@+id/start_listen_btn"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_marginStart="0dp"
@@ -109,14 +108,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
+            android:background="#ffffff"
             android:orientation="horizontal">
 
             <ListView
                 android:id="@+id/list"
                 android:layout_width="match_parent"
-                android:layout_height="509dp"
+                android:layout_height="642dp"
                 android:layout_marginStart="0dp"
-                android:layout_marginTop="-2dp" />
+                android:layout_marginTop="-2dp"
+                android:transcriptMode="alwaysScroll"/>
 
         </LinearLayout>
 

@@ -33,6 +33,11 @@ dependencies {
     implementation 'com.github.blikoon:QRCodeScanner:0.1.2'
 //    // used for chat view
     implementation 'com.github.stfalcon:chatkit:0.3.3'
+
+
+    implementation 'org.jsoup:jsoup:1.11.3'
+    implementation 'io.github.ponnamkarthik:richlinkpreview:1.0.9'
+    implementation 'com.squareup.picasso:picasso:2.71828'
 }
 
 repositories {
