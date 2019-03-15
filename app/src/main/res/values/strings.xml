@@ -7,4 +7,6 @@
     <string name="no_results_found">No Matching Results</string>
     <string name="destroied">Response</string>
     <string name="you_may_speak">Listening...</string>
+    <string name="title_scan_qr_code">Scan QR code</string>
+    <string name="scan_help_info">Scan the QR code on bus, then you can login Speech APP!</string>
 </resources>

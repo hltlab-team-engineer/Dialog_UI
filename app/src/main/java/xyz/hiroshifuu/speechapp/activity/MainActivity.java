@@ -9,7 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.CheckBox;
+import android.view.View;
 import android.widget.Toast;
 
 import com.dlazaro66.qrcodereaderview.QRCodeReaderView;
@@ -19,47 +19,59 @@ import xyz.hiroshifuu.speechapp.R;
 public class MainActivity extends AppCompatActivity implements QRCodeReaderView.OnQRCodeReadListener {
 
     private QRCodeReaderView qrCodeReaderView;
-    private CheckBox flashlightCheckBox;
-    private CheckBox enableDecodingCheckBox;
+
+    private View mLlFlashLight;
+
+    private static final long VIBRATE_DURATION = 1000L;
+
+
     private static final int MY_PERMISSION_REQUEST_CAMERA = 0;
     private String preResult = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.active_qr_scanner);
+        Log.d("create main layout","create main layout");
+        checkPermission();
+    }
 
-        setContentView(R.layout.barcode);
-
+    private void checkPermission(){
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_GRANTED) {
+            // create qr code reader layout
             initQRCodeReaderView();
         } else {
             requestCameraPermission();
         }
     }
-
     private void initQRCodeReaderView() {
-        qrCodeReaderView = (QRCodeReaderView) findViewById(R.id.qrdecoderview);
-        qrCodeReaderView.setAutofocusInterval(2000L);
+        qrCodeReaderView = (QRCodeReaderView) findViewById(R.id.qr_code_view_finder);
+        qrCodeReaderView.setAutofocusInterval(VIBRATE_DURATION);
         qrCodeReaderView.setOnQRCodeReadListener(this);
         qrCodeReaderView.setBackCamera();
         qrCodeReaderView.startCamera();
+        qrCodeReaderView.setVisibility(View.VISIBLE);
+
+        mLlFlashLight = findViewById(R.id.qr_code_ll_flash_light);
+        mLlFlashLight.setVisibility(View.VISIBLE);
     }
 
     private void requestCameraPermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[] {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{
                     Manifest.permission.CAMERA
             }, MY_PERMISSION_REQUEST_CAMERA);
         } else {
-            ActivityCompat.requestPermissions(this, new String[] {
+            ActivityCompat.requestPermissions(this, new String[]{
                     Manifest.permission.CAMERA
             }, MY_PERMISSION_REQUEST_CAMERA);
         }
     }
 
-    @Override public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                                     @NonNull int[] grantResults) {
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         if (requestCode != MY_PERMISSION_REQUEST_CAMERA) {
             return;
         }
@@ -70,7 +82,8 @@ public class MainActivity extends AppCompatActivity implements QRCodeReaderView.
         }
     }
 
-    @Override protected void onResume() {
+    @Override
+    protected void onResume() {
         super.onResume();
 
         if (qrCodeReaderView != null) {
@@ -102,3 +115,4 @@ public class MainActivity extends AppCompatActivity implements QRCodeReaderView.
         startActivity(mintent);
     }
 }
+

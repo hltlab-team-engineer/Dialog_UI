@@ -1,5 +1,6 @@
 package xyz.hiroshifuu.speechapp.activity;
 
+
 import android.Manifest;
 //import android.support.v7.widget.RecyclerView;
 import android.app.Activity;
@@ -51,20 +52,20 @@ import xyz.hiroshifuu.speechapp.common.ProperUtil;
 import xyz.hiroshifuu.speechapp.common.SpeechItem;
 import xyz.hiroshifuu.speechapp.common.SpeechRecognizerManager;
 
-public class SpeechActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
+public class NewSpeechActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
 
     private static final int SERVERPORT = 5588;
-//    private static final String SERVER_IP = "3.1.160.222";
+    //    private static final String SERVER_IP = "3.1.160.222";
     private static final String SERVER_IP = "3.0.6.160";
     //private TextView status_tv;
 //    private TextView result_tv;
     private EditText result_tv2;
-//    private TextView result_server_tv;
+    //    private TextView result_server_tv;
     private Button start_listen_btn;
     Client myClient = null;
     private SpeechRecognizerManager mSpeechManager;
     private TextToSpeech tts;
-//    private String bus = "No bus";
+    //    private String bus = "No bus";
     private String bus = "95";
     public String qryresp, res;
     private Button location; //Press to send location to server
@@ -77,8 +78,8 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
     final Handler handler = new Handler();
 
     //new added
-   // RecyclerView recyclerView;
-   // MessageAdapter messageAdapter;
+    // RecyclerView recyclerView;
+    // MessageAdapter messageAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,7 +114,7 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
                 startActivity(intent);
             }
         };
-            //add user permission check
+        //add user permission check
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[]{
@@ -171,7 +172,7 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
         //status_tv = findViewById(R.id.status_tv);
 
         //-----------------------------
-       // recyclerView = findViewById(R.id.conversation);
+        // recyclerView = findViewById(R.id.conversation);
 
         //new added above
 //        result_tv = findViewById(R.id.result_tv);
@@ -196,7 +197,7 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
 //        result_server_tv = findViewById(R.id.result_server_tv);
         start_listen_btn = findViewById(R.id.start_listen_btn);
         //location = findViewById(R.id.location);
-       // textView = findViewById(R.id.textView);//location results
+        // textView = findViewById(R.id.textView);//location results
     }
 
     private void setClickListeners() {
@@ -325,3 +326,4 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
         tts.speak(speech, TextToSpeech.QUEUE_FLUSH, null, null);
     }
 }
+
