@@ -1,5 +1,6 @@
 package xyz.hiroshifuu.speechapp.activity;
 
+
 import android.Manifest;
 //import android.support.v7.widget.RecyclerView;
 import android.app.Activity;
@@ -19,12 +20,11 @@ import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -32,40 +32,45 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
-import xyz.hiroshifuu.speechapp.common.Client;
-import xyz.hiroshifuu.speechapp.adapter.CustomAdapter;
-import xyz.hiroshifuu.speechapp.common.PermissionHandler;
-import xyz.hiroshifuu.speechapp.R;
-import xyz.hiroshifuu.speechapp.common.ProperUtil;
-import xyz.hiroshifuu.speechapp.common.SpeechItem;
-import xyz.hiroshifuu.speechapp.common.SpeechRecognizerManager;
+import xyz.hiroshifuu.speechapp.messages.MessageInput;
+import xyz.hiroshifuu.speechapp.messages.MessagesList;
+import xyz.hiroshifuu.speechapp.messages.MessagesListAdapter;
 
-public class SpeechActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
+import xyz.hiroshifuu.speechapp.commons.AppUtils;
+import xyz.hiroshifuu.speechapp.commons.Client;
+import xyz.hiroshifuu.speechapp.commons.Message;
+import xyz.hiroshifuu.speechapp.commons.PermissionHandler;
+import xyz.hiroshifuu.speechapp.R;
+import xyz.hiroshifuu.speechapp.commons.ProperUtil;
+import xyz.hiroshifuu.speechapp.commons.SpeechItem;
+import xyz.hiroshifuu.speechapp.commons.SpeechRecognizerManager;
+import xyz.hiroshifuu.speechapp.commons.MessagesFixtures;
+
+public class SpeechActivity extends DemoMessagesActivity
+        implements MessageInput.InputListener,
+        MessageInput.AttachmentsListener,
+        MessageInput.TypingListener,
+        TextToSpeech.OnInitListener {
+
+    private Properties my_property;
+
 
     private static final int SERVERPORT = 5588;
-//    private static final String SERVER_IP = "3.1.160.222";
+
     private static final String SERVER_IP = "3.0.6.160";
-    //private TextView status_tv;
-//    private TextView result_tv;
+
     private EditText result_tv2;
-//    private TextView result_server_tv;
     private Button start_listen_btn;
     Client myClient = null;
     private SpeechRecognizerManager mSpeechManager;
     private TextToSpeech tts;
-//    private String bus = "No bus";
-    private String bus = "95";
+    private String bus = "NO BUS";
     public String qryresp, res;
     private Button location; //Press to send location to server
     private TextView textView; //Show location in textview
@@ -74,21 +79,74 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
     private ListView listView;
     private ArrayList<SpeechItem> listItems;
 
+    private MessagesList messagesList;
+
     final Handler handler = new Handler();
 
-    //new added
-   // RecyclerView recyclerView;
-   // MessageAdapter messageAdapter;
+    // MessageAdapter messageAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.avtive_chat_dialog);
 
-        setContentView(R.layout.speech);
-        findViews();
-        setClickListeners();
+        my_property = ProperUtil.getPropertiesURL(getApplicationContext());
 
         tts = new TextToSpeech(getApplicationContext(), this);
+
+        this.messagesList = (MessagesList) this.findViewById(R.id.messagesList2);
+        initAdapter();
+
+        MessageInput input = (MessageInput) this.findViewById(R.id.input2);
+        input.setInputListener(this);
+        input.setTypingListener(this);
+        input.setAttachmentsListener(this);
+
+        checkPermission();
+    }
+
+    @Override
+    public boolean onSubmit(CharSequence input) {
+        super.messagesAdapter.addToStart(
+                MessagesFixtures.getTextMessage(input.toString(), "0"), true);
+        super.messagesAdapter.addToStart(
+                MessagesFixtures.getTextMessage(input.toString(), "1"), true);
+        return true;
+    }
+
+    @Override
+    public void onAddAttachments() {
+        super.messagesAdapter.addToStart(
+                MessagesFixtures.getImageMessage("image","0"), true);
+    }
+
+    private void initAdapter() {
+        super.messagesAdapter = new MessagesListAdapter<>(super.senderId, super.imageLoader);
+        super.messagesAdapter.enableSelectionMode(this);
+        super.messagesAdapter.setLoadMoreListener(this);
+        super.messagesAdapter.registerViewClickListener(R.id.messageUserAvatar,
+                new MessagesListAdapter.OnMessageViewClickListener<Message>() {
+                    @Override
+                    public void onMessageViewClick(View view, Message message) {
+                        AppUtils.showToast(SpeechActivity.this,
+                                message.getUser().getName() + " avatar click",
+                                false);
+                    }
+                });
+        this.messagesList.setAdapter(super.messagesAdapter);
+    }
+
+    @Override
+    public void onStartTyping() {
+        Log.v("Typing listener", getString(R.string.start_typing_status));
+    }
+
+    @Override
+    public void onStopTyping() {
+        Log.v("Typing listener", getString(R.string.stop_typing_status));
+    }
+
+    private void checkPermission(){
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//initialise locationManager
         locationListener = new LocationListener() {//initialise locationlistenser
 
@@ -113,7 +171,7 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
                 startActivity(intent);
             }
         };
-            //add user permission check
+        //add user permission check
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[]{
@@ -121,25 +179,9 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
                         Manifest.permission.INTERNET
                 }, 10);//request code is a integer, indicator for permission
             }
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+
         }
-
-
-        listView = findViewById(R.id.list);
-        listItems = new ArrayList<SpeechItem>();
-        SpeechItem item;
-        item = new SpeechItem("Hello, How can I assist you? Do you have queries related to? \n - Bus route \n -Surrounding places such as shopping malls, hospitals \n -Other rules and regulations", false, false);
-        listItems.add(item);
-        ArrayAdapter ad = new CustomAdapter(listItems, getApplicationContext());
-        listView.setAdapter(ad);
     }
-
 
 
     @Override
@@ -171,7 +213,7 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
         //status_tv = findViewById(R.id.status_tv);
 
         //-----------------------------
-       // recyclerView = findViewById(R.id.conversation);
+        // recyclerView = findViewById(R.id.conversation);
 
         //new added above
 //        result_tv = findViewById(R.id.result_tv);
@@ -196,7 +238,7 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
 //        result_server_tv = findViewById(R.id.result_server_tv);
         start_listen_btn = findViewById(R.id.start_listen_btn);
         //location = findViewById(R.id.location);
-       // textView = findViewById(R.id.textView);//location results
+        // textView = findViewById(R.id.textView);//location results
     }
 
     private void setClickListeners() {
@@ -325,3 +367,4 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
         tts.speak(speech, TextToSpeech.QUEUE_FLUSH, null, null);
     }
 }
+

@@ -1,6 +1,5 @@
 package xyz.hiroshifuu.speechapp.activity;
 
-
 import android.Manifest;
 //import android.support.v7.widget.RecyclerView;
 import android.app.Activity;
@@ -33,39 +32,32 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
-import xyz.hiroshifuu.speechapp.common.Client;
+import xyz.hiroshifuu.speechapp.commons.Client;
 import xyz.hiroshifuu.speechapp.adapter.CustomAdapter;
-import xyz.hiroshifuu.speechapp.common.PermissionHandler;
+import xyz.hiroshifuu.speechapp.commons.PermissionHandler;
 import xyz.hiroshifuu.speechapp.R;
-import xyz.hiroshifuu.speechapp.common.ProperUtil;
-import xyz.hiroshifuu.speechapp.common.SpeechItem;
-import xyz.hiroshifuu.speechapp.common.SpeechRecognizerManager;
+import xyz.hiroshifuu.speechapp.commons.SpeechItem;
+import xyz.hiroshifuu.speechapp.commons.SpeechRecognizerManager;
 
-public class NewSpeechActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
+public class OldSpeechActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
 
     private static final int SERVERPORT = 5588;
-    //    private static final String SERVER_IP = "3.1.160.222";
+//    private static final String SERVER_IP = "3.1.160.222";
     private static final String SERVER_IP = "3.0.6.160";
     //private TextView status_tv;
 //    private TextView result_tv;
     private EditText result_tv2;
-    //    private TextView result_server_tv;
+//    private TextView result_server_tv;
     private Button start_listen_btn;
     Client myClient = null;
     private SpeechRecognizerManager mSpeechManager;
     private TextToSpeech tts;
-    //    private String bus = "No bus";
+//    private String bus = "No bus";
     private String bus = "95";
     public String qryresp, res;
     private Button location; //Press to send location to server
@@ -78,8 +70,8 @@ public class NewSpeechActivity extends AppCompatActivity implements TextToSpeech
     final Handler handler = new Handler();
 
     //new added
-    // RecyclerView recyclerView;
-    // MessageAdapter messageAdapter;
+   // RecyclerView recyclerView;
+   // MessageAdapter messageAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,7 +106,7 @@ public class NewSpeechActivity extends AppCompatActivity implements TextToSpeech
                 startActivity(intent);
             }
         };
-        //add user permission check
+            //add user permission check
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[]{
@@ -172,7 +164,7 @@ public class NewSpeechActivity extends AppCompatActivity implements TextToSpeech
         //status_tv = findViewById(R.id.status_tv);
 
         //-----------------------------
-        // recyclerView = findViewById(R.id.conversation);
+       // recyclerView = findViewById(R.id.conversation);
 
         //new added above
 //        result_tv = findViewById(R.id.result_tv);
@@ -197,7 +189,7 @@ public class NewSpeechActivity extends AppCompatActivity implements TextToSpeech
 //        result_server_tv = findViewById(R.id.result_server_tv);
         start_listen_btn = findViewById(R.id.start_listen_btn);
         //location = findViewById(R.id.location);
-        // textView = findViewById(R.id.textView);//location results
+       // textView = findViewById(R.id.textView);//location results
     }
 
     private void setClickListeners() {
@@ -326,4 +318,3 @@ public class NewSpeechActivity extends AppCompatActivity implements TextToSpeech
         tts.speak(speech, TextToSpeech.QUEUE_FLUSH, null, null);
     }
 }
-

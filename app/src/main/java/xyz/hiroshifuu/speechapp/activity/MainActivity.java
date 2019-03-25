@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements QRCodeReaderView.
         Log.d("onQRCodeRead ", text);
         Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
         preResult = text;
-        Intent mintent = new Intent(MainActivity.this, SpeechActivity.class);
+        Intent mintent = new Intent(MainActivity.this, OldSpeechActivity.class);
         Bundle b = new Bundle();
         b.putString("bus", text); //Your id
         mintent.putExtras(b); //Put your id to your next Intent

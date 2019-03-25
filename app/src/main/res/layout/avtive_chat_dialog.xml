@@ -1,0 +1,64 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <RelativeLayout
+        android:id="@+id/chat_header_bar"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:background="@android:color/black">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="10dp"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:text="@string/title_av_bus"
+            android:textColor="@color/qr_code_white"
+            android:textSize="18sp"/>
+
+
+        <ImageView
+            android:id="@+id/chat_image_view_nus"
+            android:layout_width="56dp"
+            android:layout_height="48dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="10dp"
+            android:gravity="center"
+            android:paddingRight="0dp"
+            android:src="@drawable/nus1" />
+
+    </RelativeLayout>
+
+
+    <xyz.hiroshifuu.speechapp.messages.MessagesList
+        android:id="@+id/messagesList2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/input2"
+        android:layout_below="@+id/chat_header_bar"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_above="@+id/input2"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:background="@color/gray_light"/>
+
+    <xyz.hiroshifuu.speechapp.messages.MessageInput
+        android:id="@+id/input2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:inputHint="@string/hint_enter_a_message"
+        app:showAttachmentButton="true"/>
+
+
+
+</RelativeLayout>

@@ -1,6 +1,4 @@
-package xyz.hiroshifuu.speechapp.common;
-
-import java.util.Properties;
+package xyz.hiroshifuu.speechapp.commons;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

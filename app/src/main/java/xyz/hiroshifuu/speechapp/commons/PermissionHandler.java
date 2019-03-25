@@ -1,4 +1,4 @@
-package xyz.hiroshifuu.speechapp.common;
+package xyz.hiroshifuu.speechapp.commons;
 
 import android.Manifest;
 import android.app.Activity;

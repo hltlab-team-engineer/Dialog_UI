@@ -22,7 +22,7 @@ import io.github.ponnamkarthik.richlinkpreview.RichLinkView;
 import io.github.ponnamkarthik.richlinkpreview.RichPreview;
 import io.github.ponnamkarthik.richlinkpreview.ViewListener;
 import xyz.hiroshifuu.speechapp.R;
-import xyz.hiroshifuu.speechapp.common.SpeechItem;
+import xyz.hiroshifuu.speechapp.commons.SpeechItem;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;

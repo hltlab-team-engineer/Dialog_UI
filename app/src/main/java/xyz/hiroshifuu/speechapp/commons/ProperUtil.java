@@ -1,6 +1,7 @@
-package xyz.hiroshifuu.speechapp.common;
+package xyz.hiroshifuu.speechapp.commons;
 
 import android.content.Context;
+
 import java.util.Properties;
 
 public class ProperUtil {
@@ -8,7 +9,7 @@ public class ProperUtil {
         Properties urlProps;
         Properties properties = new Properties();
         try {
-            properties.load(c.getAssets().open("config"));
+            properties.load(c.getAssets().open("config.properties"));
         } catch (Exception e) {
             e.printStackTrace();
         }
