@@ -34,6 +34,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
@@ -44,10 +45,11 @@ import xyz.hiroshifuu.speechapp.R;
 import xyz.hiroshifuu.speechapp.common.SpeechItem;
 import xyz.hiroshifuu.speechapp.common.SpeechRecognizerManager;
 
+import java.util.Arrays;
 public class SpeechActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
 
     private static final int SERVERPORT = 5588;
-    private static final String SERVER_IP = "3.1.160.222";
+    private static final String SERVER_IP = "18.136.239.195";
     //private TextView status_tv;
     private TextView result_tv;
     private EditText result_tv2;
@@ -125,10 +127,17 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
         listView = findViewById(R.id.list);
         listItems = new ArrayList<SpeechItem>();
         SpeechItem item;
-        item = new SpeechItem("Hello, How can I assist you? Do you have queries related to? \n - Bus route \n -Surrounding places such as shopping malls, hospitals \n -Other rules and regulations", false, false);
+        String qrystr = "Hello, How can I assist you?: Do you have queries related to? ";
+        String qrystr1= "- Bus route \n -Surrounding places such as shopping malls, hospitals \n -Other rules and regulations";
+        item = new SpeechItem(qrystr, false, false);
         listItems.add(item);
         ArrayAdapter ad = new CustomAdapter(listItems, getApplicationContext());
         listView.setAdapter(ad);
+        TTS_speak(qrystr);
+        listItems.add(new SpeechItem(qrystr1, false, false));
+        ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
+
+
     }
 
 
@@ -231,10 +240,25 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
         {
             e.printStackTrace();
         }
-        TTS_speak(qryresp);
-        listItems.add(new SpeechItem(qryresp, false, false));
-        ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
 
+        qryresp = qryresp.replace("\\n","\n");
+        if(qryresp.contains(":")) {
+            List<String> result = Arrays.asList(qryresp.split("\\s*:\\s*"));
+            String q1 = result.get(0);
+            String q2 = result.get(1);
+
+            TTS_speak(q1);
+            listItems.add(new SpeechItem(q1, false, false));
+            ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
+            listItems.add(new SpeechItem(q2, false, false));
+            ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
+
+        }
+        else {
+            TTS_speak(qryresp);
+            listItems.add(new SpeechItem(qryresp, false, false));
+            ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
+        }
         /* (To be used for google map)
        SpeechItem item = new SpeechItem("https://www.google.com/maps/dir/?api=1&origin=Sembwang&destination=Clementi&travelmode=bus", false, true);
        listItems.add(item);
@@ -300,7 +324,10 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
         Bundle b = getIntent().getExtras();
         if (b != null)
             bus = b.getString("bus");
-        TTS_speak("TTS is ready, Bus ID is : " + bus);
+        //TTS_speak("TTS is ready, Bus ID is : " + bus);
+        String qrystr = "Hello, How can I assist you?: Do you have queries related to? ";
+
+        TTS_speak(qrystr);
     }
 
     private void TTS_speak(String speech) {
