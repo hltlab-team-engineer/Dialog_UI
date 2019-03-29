@@ -128,7 +128,7 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
         listItems = new ArrayList<SpeechItem>();
         SpeechItem item;
         String qrystr = "Hello, How can I assist you?: Do you have queries related to? ";
-        String qrystr1= "- Bus route \n -Surrounding places such as shopping malls, hospitals \n -Other rules and regulations";
+        String qrystr1= "- Bus route \n -Other rules and regulations";
         item = new SpeechItem(qrystr, false, false);
         listItems.add(item);
         ArrayAdapter ad = new CustomAdapter(listItems, getApplicationContext());
@@ -242,8 +242,8 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
         }
 
         qryresp = qryresp.replace("\\n","\n");
-        if(qryresp.contains(":")) {
-            List<String> result = Arrays.asList(qryresp.split("\\s*:\\s*"));
+        if(qryresp.contains("::")) {
+            List<String> result = Arrays.asList(qryresp.split("\\s*::\\s*"));
             String q1 = result.get(0);
             String q2 = result.get(1);
 
