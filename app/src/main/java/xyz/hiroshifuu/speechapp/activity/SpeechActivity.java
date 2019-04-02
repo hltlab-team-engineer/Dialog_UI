@@ -25,10 +25,13 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Properties;
 
+import retrofit2.Call;
+import xyz.hiroshifuu.speechapp.commons.HttpUtil;
 import xyz.hiroshifuu.speechapp.commons.PermissionHandler;
 import xyz.hiroshifuu.speechapp.commons.SpeechRecognizerManager;
 import xyz.hiroshifuu.speechapp.messages.MessageInput;
@@ -41,6 +44,8 @@ import xyz.hiroshifuu.speechapp.commons.Message;
 import xyz.hiroshifuu.speechapp.R;
 import xyz.hiroshifuu.speechapp.commons.ProperUtil;
 import xyz.hiroshifuu.speechapp.commons.MessagesFixtures;
+import xyz.hiroshifuu.speechapp.models.TextMessage;
+import xyz.hiroshifuu.speechapp.utils.RetrofitClientInstance;
 
 public class SpeechActivity extends DemoMessagesActivity
         implements MessageInput.InputListener,
@@ -67,12 +72,19 @@ public class SpeechActivity extends DemoMessagesActivity
     private MessageInput input;
     private Activity that;
 
+    private HttpUtil httpUtil;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.avtive_chat_dialog);
 
         my_property = ProperUtil.getPropertiesURL(getApplicationContext());
+        String base_url = my_property.getProperty("serverUrl");
+        String port = my_property.getProperty("port");
+        String path = base_url + ":" + port + "/";
+
+        httpUtil = RetrofitClientInstance.getRetrofitInstance(path).create(HttpUtil.class);
 
         tts = new TextToSpeech(getApplicationContext(), this);
 
@@ -108,9 +120,11 @@ public class SpeechActivity extends DemoMessagesActivity
     }
 
     @Override
-    public boolean onSubmit(CharSequence input, String userID) {
+    public boolean onSubmit(CharSequence input, String userID) throws IOException {
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(input.toString(), userID), true);
+        Call<TextMessage> textInfo = httpUtil.getTextMessage(input.toString());
+        Log.d("textMessage", textInfo.execute().body().getTextINfo());
         return true;
     }
 

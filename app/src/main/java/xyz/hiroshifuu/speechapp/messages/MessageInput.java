@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 //import xyz.hiroshifuu.speechapp.R;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 
 import xyz.hiroshifuu.speechapp.R;
@@ -108,7 +109,12 @@ public class MessageInput extends RelativeLayout
     public void onClick(View view) {
         int id = view.getId();
         if (id == R.id.messageSendButton) {
-            boolean isSubmitted = onSubmit("0");
+            boolean isSubmitted = false;
+            try {
+                isSubmitted = onSubmit("0");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             if (isSubmitted) {
                 messageInput.setText("");
             }
@@ -163,7 +169,7 @@ public class MessageInput extends RelativeLayout
         lastFocus = hasFocus;
     }
 
-    private boolean onSubmit(String userID) {
+    private boolean onSubmit(String userID) throws IOException {
         return inputListener != null && inputListener.onSubmit(input, userID);
     }
 
@@ -278,7 +284,7 @@ public class MessageInput extends RelativeLayout
          * @param input input entered by user
          * @return if input text is valid, you must return {@code true} and input will be cleared, otherwise return false.
          */
-        boolean onSubmit(CharSequence input, String userID);
+        boolean onSubmit(CharSequence input, String userID) throws IOException;
     }
 
     /**
