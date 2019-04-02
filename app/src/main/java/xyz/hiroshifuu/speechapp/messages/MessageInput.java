@@ -1,6 +1,8 @@
 package xyz.hiroshifuu.speechapp.messages;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.v4.view.ViewCompat;
@@ -8,6 +10,7 @@ import android.support.v4.widget.Space;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.EditText;
@@ -15,9 +18,11 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import xyz.hiroshifuu.speechapp.R;
+//import xyz.hiroshifuu.speechapp.R;
 
 import java.lang.reflect.Field;
+
+import xyz.hiroshifuu.speechapp.R;
 
 /**
  * Component for input outcoming messages
@@ -28,12 +33,12 @@ public class MessageInput extends RelativeLayout
 
     protected EditText messageInput;
     protected ImageButton messageSendButton;
-    protected ImageButton attachmentButton;
+    public ImageButton attachmentButton;
     protected Space sendButtonSpace, attachmentButtonSpace;
 
     private CharSequence input;
     private InputListener inputListener;
-    private AttachmentsListener attachmentsListener;
+    private SoundListener soundListener;
     private boolean isTyping;
     private TypingListener typingListener;
     private int delayTypingStatusMillis;
@@ -75,10 +80,10 @@ public class MessageInput extends RelativeLayout
     /**
      * Sets callback for 'add' button.
      *
-     * @param attachmentsListener input callback
+     * @param soundListener input callback
      */
-    public void setAttachmentsListener(AttachmentsListener attachmentsListener) {
-        this.attachmentsListener = attachmentsListener;
+    public void setSoundListener(SoundListener soundListener) {
+        this.soundListener = soundListener;
     }
 
     /**
@@ -103,15 +108,16 @@ public class MessageInput extends RelativeLayout
     public void onClick(View view) {
         int id = view.getId();
         if (id == R.id.messageSendButton) {
-            boolean isSubmitted = onSubmit();
+            boolean isSubmitted = onSubmit("0");
             if (isSubmitted) {
                 messageInput.setText("");
             }
             removeCallbacks(typingTimerRunnable);
             post(typingTimerRunnable);
-        } else if (id == R.id.attachmentButton) {
-            onAddAttachments();
         }
+//        else if (id == R.id.attachmentButton) {
+//            onSound();
+//        }
     }
 
     /**
@@ -157,12 +163,21 @@ public class MessageInput extends RelativeLayout
         lastFocus = hasFocus;
     }
 
-    private boolean onSubmit() {
-        return inputListener != null && inputListener.onSubmit(input);
+    private boolean onSubmit(String userID) {
+        return inputListener != null && inputListener.onSubmit(input, userID);
     }
 
-    private void onAddAttachments() {
-        if (attachmentsListener != null) attachmentsListener.onAddAttachments();
+
+    private void onSound() {
+        attachmentButton.setClickable(false);
+        attachmentButton.getBackground().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
+
+        Log.d("listener: ", "start");
+        soundListener.onSoundListener();
+        Log.d("listener: ", "end");
+
+        attachmentButton.setClickable(true);
+        attachmentButton.getBackground().setColorFilter(null);
     }
 
     private void init(Context context, AttributeSet attrs) {
@@ -263,18 +278,18 @@ public class MessageInput extends RelativeLayout
          * @param input input entered by user
          * @return if input text is valid, you must return {@code true} and input will be cleared, otherwise return false.
          */
-        boolean onSubmit(CharSequence input);
+        boolean onSubmit(CharSequence input, String userID);
     }
 
     /**
      * Interface definition for a callback to be invoked when user presses 'add' button
      */
-    public interface AttachmentsListener {
+    public interface SoundListener {
 
         /**
          * Fires when user presses 'add' button.
          */
-        void onAddAttachments();
+        void onSoundListener();
     }
 
     /**

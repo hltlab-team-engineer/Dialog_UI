@@ -252,22 +252,22 @@ public class OldSpeechActivity extends AppCompatActivity implements TextToSpeech
     }
 
     private void SetSpeechListener() {
-        mSpeechManager = new SpeechRecognizerManager(this, new SpeechRecognizerManager.onResultsReady() {
-            @Override
-            public void onResults(ArrayList<String> results) {
-                if (results != null && results.size() > 0) {
-                    res = results.get(0);
-                    sendMessage(res);
-                } else {
-                    //status_tv.setText(getString(R.string.no_results_found));
-                }
-                //status_tv.setText(getString(R.string.destroied));
-                mSpeechManager.destroy();
-                mSpeechManager = null;
-                start_listen_btn.setClickable(true);
-                start_listen_btn.getBackground().setColorFilter(null);
-            }
-        });
+//        mSpeechManager = new SpeechRecognizerManager(this, new SpeechRecognizerManager.onResultsReady() {
+//            @Override
+//            public void onResults(ArrayList<String> results) {
+//                if (results != null && results.size() > 0) {
+//                    res = results.get(0);
+//                    sendMessage(res);
+//                } else {
+//                    //status_tv.setText(getString(R.string.no_results_found));
+//                }
+//                //status_tv.setText(getString(R.string.destroied));
+//                mSpeechManager.destroy();
+//                mSpeechManager = null;
+//                start_listen_btn.setClickable(true);
+//                start_listen_btn.getBackground().setColorFilter(null);
+//            }
+//        });
     }
 
     @Override

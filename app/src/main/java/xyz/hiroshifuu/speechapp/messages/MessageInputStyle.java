@@ -175,7 +175,7 @@ class MessageInputStyle extends Style {
     protected Drawable getAttachmentButtonIcon() {
         if (attachmentButtonIcon == -1) {
             return getSelector(attachmentButtonDefaultIconColor, attachmentButtonDefaultIconPressedColor,
-                    attachmentButtonDefaultIconDisabledColor, R.drawable.ic_add_attachment);
+                    attachmentButtonDefaultIconDisabledColor, R.drawable.microphone);
         } else {
             return getDrawable(attachmentButtonIcon);
         }
