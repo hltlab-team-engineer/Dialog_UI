@@ -15,6 +15,8 @@ import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
@@ -54,8 +56,6 @@ public class SpeechActivity extends DemoMessagesActivity
 
     private Properties my_property;
 
-    private static final int SERVERPORT = 5588;
-    private static final String SERVER_IP = "3.0.6.160";
 
     Client myClient = null;
 
@@ -83,6 +83,7 @@ public class SpeechActivity extends DemoMessagesActivity
         String base_url = my_property.getProperty("serverUrl");
         String port = my_property.getProperty("port");
         String path = base_url + ":" + port + "/";
+        Log.d("path", path);
 
         httpUtil = RetrofitClientInstance.getRetrofitInstance(path).create(HttpUtil.class);
 
@@ -120,14 +121,53 @@ public class SpeechActivity extends DemoMessagesActivity
     }
 
     @Override
-    public boolean onSubmit(CharSequence input, String userID) throws IOException {
+    public boolean onSubmit(final CharSequence input, final String userID) throws IOException {
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(input.toString(), userID), true);
-        Call<TextMessage> textInfo = httpUtil.getTextMessage(input.toString());
-        Log.d("textMessage", textInfo.execute().body().getTextINfo());
+        ResponseMessage response_Message = new ResponseMessage(input.toString());
+        Thread th0 = new Thread(response_Message);
+        th0.start();
+        // TODO find a method to sync
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if(response_Message.getResponse_str() != ""){
+            super.messagesAdapter.addToStart(
+                    MessagesFixtures.getTextMessage(response_Message.getResponse_str(), "1"), true);
+        }
+        else{
+            Log.d("adapter error:", "can not get response info!");
+        }
+
         return true;
     }
 
+    class ResponseMessage implements Runnable{
+        private String response_str;
+        private String input;
+
+        ResponseMessage(String input){
+            this.input = input;
+        }
+
+        public String getResponse_str(){
+            return this.response_str;
+        }
+
+        @Override
+        public void run() {
+            Call<TextMessage> textInfo = null;
+            try {
+                textInfo = httpUtil.getTextMessage(input);
+                response_str = textInfo.execute().body().getResponse_str();
+                Log.d("textMessage", response_str);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     private String SetSpeechListener() {
         res = "";
@@ -148,6 +188,22 @@ public class SpeechActivity extends DemoMessagesActivity
 
             }
         });
+        ResponseMessage response_Message = new ResponseMessage(input.toString());
+        Thread th0 = new Thread(response_Message);
+        th0.start();
+        // TODO find a method to sync
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if(response_Message.getResponse_str() != ""){
+            super.messagesAdapter.addToStart(
+                    MessagesFixtures.getTextMessage(response_Message.getResponse_str(), "1"), true);
+        }
+        else{
+            Log.d("adapter error:", "can not get response info!");
+        }
         return res;
     }
 
@@ -276,50 +332,5 @@ public class SpeechActivity extends DemoMessagesActivity
         }
     }
 
-//    private void sendMessage(String text) {
-//
-//        listItems.add(new SpeechItem(text, true, false));
-//        ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
-//        try {
-//            myClient = new Client(SERVER_IP, SERVERPORT, text);
-//            qryresp = myClient.execute().get();
-//        }
-//        catch (InterruptedException e)
-//        {
-//            e.printStackTrace();
-//        }
-//        catch (ExecutionException e)
-//        {
-//            e.printStackTrace();
-//        }
-//        TTS_speak(qryresp);
-//        listItems.add(new SpeechItem(qryresp, false, false));
-//        ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
-//
-//        /* (To be used for google map)
-//       SpeechItem item = new SpeechItem("https://www.google.com/maps/dir/?api=1&origin=Sembwang&destination=Clementi&travelmode=bus", false, true);
-//       listItems.add(item);
-//        */
-//
-//        final ScrollView scrollview = (findViewById(R.id.scrollview));
-//        scrollview.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                scrollview.fullScroll(ScrollView.FOCUS_DOWN);
-//            }
-//        },100);
-//    }
-
-
-    private void configureButton() {
-        location.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String loc = textView.getText().toString();
-                Client myClient = new Client(SERVER_IP, SERVERPORT, loc);//send location to sever
-                myClient.execute();
-            }
-        });
-    }
 }
 

@@ -1,16 +1,16 @@
 package xyz.hiroshifuu.speechapp.models;
 
 public class TextMessage {
-    private String textINfo;
-    public TextMessage(String textINfo){
-        this.textINfo = textINfo;
+    private String response_str;
+    public TextMessage(String response_str){
+        this.response_str = response_str;
     }
 
-    public String getTextINfo() {
-        return textINfo;
+    public String getResponse_str() {
+        return response_str;
     }
 
-    public void setTextINfo(String textINfo) {
-        this.textINfo = textINfo;
+    public void setResponse_str(String response_str) {
+        this.response_str = response_str;
     }
 }
