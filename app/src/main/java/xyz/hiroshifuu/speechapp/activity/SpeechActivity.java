@@ -60,7 +60,7 @@ public class SpeechActivity extends DemoMessagesActivity
     Client myClient = null;
 
     private TextToSpeech tts;
-    private String bus = "NO BUS";
+    private String bus = "NO_BUS";
     public String qryresp, res;
     private Button location; //Press to send location to server
     private TextView textView; //Show location in textview
@@ -160,7 +160,7 @@ public class SpeechActivity extends DemoMessagesActivity
         public void run() {
             Call<TextMessage> textInfo = null;
             try {
-                textInfo = httpUtil.getTextMessage(input);
+                textInfo = httpUtil.getTextMessage(bus, input);
                 response_str = textInfo.execute().body().getResponse_str();
                 Log.d("textMessage", response_str);
             } catch (IOException e) {
