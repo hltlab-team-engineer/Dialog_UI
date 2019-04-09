@@ -41,7 +41,6 @@ import xyz.hiroshifuu.speechapp.messages.MessagesList;
 import xyz.hiroshifuu.speechapp.messages.MessagesListAdapter;
 
 import xyz.hiroshifuu.speechapp.commons.AppUtils;
-import xyz.hiroshifuu.speechapp.commons.Client;
 import xyz.hiroshifuu.speechapp.commons.Message;
 import xyz.hiroshifuu.speechapp.R;
 import xyz.hiroshifuu.speechapp.commons.ProperUtil;
@@ -56,13 +55,9 @@ public class SpeechActivity extends DemoMessagesActivity
 
     private Properties my_property;
 
-
-    Client myClient = null;
-
     private TextToSpeech tts;
     private String bus = "NO_BUS";
-    public String qryresp, res;
-    private Button location; //Press to send location to server
+    public String res;
     private TextView textView; //Show location in textview
     private LocationManager locationManager; //instance to access location services
     private LocationListener locationListener;//listen for location changes
@@ -98,21 +93,21 @@ public class SpeechActivity extends DemoMessagesActivity
 
         input.attachmentButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (PermissionHandler.checkPermission(that, PermissionHandler.RECORD_AUDIO)) {
+            if (PermissionHandler.checkPermission(that, PermissionHandler.RECORD_AUDIO)) {
 
-                    if (mSpeechManager == null) {
-                        SetSpeechListener();
-                    } else if (!mSpeechManager.ismIsListening()) {
-                        mSpeechManager.destroy();
-                        SetSpeechListener();
-                    }
-                    //status_tv.setText(getString(R.string.you_may_speak));
-                    input.attachmentButton.setClickable(false);
-                    input.attachmentButton.getBackground().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
-
-                } else {
-                    PermissionHandler.askForPermission(PermissionHandler.RECORD_AUDIO, that);
+                if (mSpeechManager == null) {
+                    SetSpeechListener();
+                } else if (!mSpeechManager.ismIsListening()) {
+                    mSpeechManager.destroy();
+                    SetSpeechListener();
                 }
+                //status_tv.setText(getString(R.string.you_may_speak));
+                input.attachmentButton.setClickable(false);
+                input.attachmentButton.getBackground().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
+
+            } else {
+                PermissionHandler.askForPermission(PermissionHandler.RECORD_AUDIO, that);
+            }
             }
         });
 
@@ -124,7 +119,7 @@ public class SpeechActivity extends DemoMessagesActivity
     public boolean onSubmit(final CharSequence input, final String userID) throws IOException {
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(input.toString(), userID), true);
-        ResponseMessage response_Message = new ResponseMessage(input.toString());
+        ResponseMessage response_Message = new ResponseMessage(input.toString(),super.messagesAdapter);
         Thread th0 = new Thread(response_Message);
         th0.start();
         // TODO find a method to sync
@@ -133,23 +128,18 @@ public class SpeechActivity extends DemoMessagesActivity
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        if(response_Message.getResponse_str() != ""){
-            super.messagesAdapter.addToStart(
-                    MessagesFixtures.getTextMessage(response_Message.getResponse_str(), "1"), true);
-        }
-        else{
-            Log.d("adapter error:", "can not get response info!");
-        }
 
         return true;
     }
 
-    class ResponseMessage implements Runnable{
+    class ResponseMessage implements Runnable {
         private String response_str;
         private String input;
+        private MessagesListAdapter messagesAdapter;
 
-        ResponseMessage(String input){
+        ResponseMessage(String input, MessagesListAdapter messagesAdapter ){
             this.input = input;
+            this.messagesAdapter = messagesAdapter;
         }
 
         public String getResponse_str(){
@@ -162,7 +152,14 @@ public class SpeechActivity extends DemoMessagesActivity
             try {
                 textInfo = httpUtil.getTextMessage(bus, input);
                 response_str = textInfo.execute().body().getResponse_str();
-                Log.d("textMessage", response_str);
+                if(response_str != ""){
+                    Log.d("textMessage", response_str);
+                    messagesAdapter.addToStart(
+                            MessagesFixtures.getTextMessage(response_str, "1"), true);
+                }
+                else{
+                    Log.d("adapter error:", "can not get response info!");
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -171,24 +168,35 @@ public class SpeechActivity extends DemoMessagesActivity
 
     private String SetSpeechListener() {
         res = "";
+        Log.d("start speech", "start speech");
         mSpeechManager = new SpeechRecognizerManager(this, new SpeechRecognizerManager.onResultsReady() {
             @Override
             public void onResults(ArrayList<String> results) {
-                if (results != null && results.size() > 0) {
-                    res = results.get(0);
-                    Log.d("res info00 : ", res);
-                    sendSoundInfo(res);
-                } else {
-                    //status_tv.setText(getString(R.string.no_results_found));
-                }
-                mSpeechManager.destroy();
-                mSpeechManager = null;
-                input.attachmentButton.setClickable(true);
-                input.attachmentButton.getBackground().setColorFilter(null);
+            if (results != null && results.size() > 0) {
+                res = results.get(0);
+                Log.d("res info00 : ", res);
+                sendSoundInfo(res);
+            } else {
+                //status_tv.setText(getString(R.string.no_results_found));
+            }
+            mSpeechManager.destroy();
+            mSpeechManager = null;
+            input.attachmentButton.setClickable(true);
+            input.attachmentButton.getBackground().setColorFilter(null);
 
             }
         });
-        ResponseMessage response_Message = new ResponseMessage(input.toString());
+
+        Log.d("after sound", "after sound");
+
+        return res;
+    }
+
+    private void sendSoundInfo(String info){
+        Log.d("sound input", info);
+        super.messagesAdapter.addToStart(
+                MessagesFixtures.getTextMessage(info, "0"), true);
+        ResponseMessage response_Message = new ResponseMessage(input.toString(), super.messagesAdapter);
         Thread th0 = new Thread(response_Message);
         th0.start();
         // TODO find a method to sync
@@ -197,19 +205,7 @@ public class SpeechActivity extends DemoMessagesActivity
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        if(response_Message.getResponse_str() != ""){
-            super.messagesAdapter.addToStart(
-                    MessagesFixtures.getTextMessage(response_Message.getResponse_str(), "1"), true);
-        }
-        else{
-            Log.d("adapter error:", "can not get response info!");
-        }
-        return res;
-    }
 
-    private void sendSoundInfo(String info){
-        super.messagesAdapter.addToStart(
-                MessagesFixtures.getTextMessage(info, "0"), true);
     }
 
     private void initAdapter() {
