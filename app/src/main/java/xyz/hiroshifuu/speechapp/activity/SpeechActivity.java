@@ -2,7 +2,6 @@ package xyz.hiroshifuu.speechapp.activity;
 
 
 import android.Manifest;
-//import android.support.v7.widget.RecyclerView;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -15,15 +14,12 @@ import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -93,21 +89,21 @@ public class SpeechActivity extends DemoMessagesActivity
 
         input.attachmentButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            if (PermissionHandler.checkPermission(that, PermissionHandler.RECORD_AUDIO)) {
+                if (PermissionHandler.checkPermission(that, PermissionHandler.RECORD_AUDIO)) {
 
-                if (mSpeechManager == null) {
-                    SetSpeechListener();
-                } else if (!mSpeechManager.ismIsListening()) {
-                    mSpeechManager.destroy();
-                    SetSpeechListener();
+                    if (mSpeechManager == null) {
+                        SetSpeechListener();
+                    } else if (!mSpeechManager.ismIsListening()) {
+                        mSpeechManager.destroy();
+                        SetSpeechListener();
+                    }
+                    //status_tv.setText(getString(R.string.you_may_speak));
+                    input.attachmentButton.setClickable(false);
+                    input.attachmentButton.getBackground().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
+
+                } else {
+                    PermissionHandler.askForPermission(PermissionHandler.RECORD_AUDIO, that);
                 }
-                //status_tv.setText(getString(R.string.you_may_speak));
-                input.attachmentButton.setClickable(false);
-                input.attachmentButton.getBackground().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
-
-            } else {
-                PermissionHandler.askForPermission(PermissionHandler.RECORD_AUDIO, that);
-            }
             }
         });
 
@@ -119,7 +115,7 @@ public class SpeechActivity extends DemoMessagesActivity
     public boolean onSubmit(final CharSequence input, final String userID) throws IOException {
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(input.toString(), userID), true);
-        ResponseMessage response_Message = new ResponseMessage(input.toString(),super.messagesAdapter);
+        ResponseMessage response_Message = new ResponseMessage(input.toString(), super.messagesAdapter);
         Thread th0 = new Thread(response_Message);
         th0.start();
         // TODO find a method to sync
@@ -137,12 +133,12 @@ public class SpeechActivity extends DemoMessagesActivity
         private String input;
         private MessagesListAdapter messagesAdapter;
 
-        ResponseMessage(String input, MessagesListAdapter messagesAdapter ){
+        ResponseMessage(String input, MessagesListAdapter messagesAdapter) {
             this.input = input;
             this.messagesAdapter = messagesAdapter;
         }
 
-        public String getResponse_str(){
+        public String getResponse_str() {
             return this.response_str;
         }
 
@@ -152,12 +148,11 @@ public class SpeechActivity extends DemoMessagesActivity
             try {
                 textInfo = httpUtil.getTextMessage(bus, input);
                 response_str = textInfo.execute().body().getResponse_str();
-                if(response_str != ""){
+                if (response_str != "") {
                     Log.d("textMessage", response_str);
                     messagesAdapter.addToStart(
                             MessagesFixtures.getTextMessage(response_str, "1"), true);
-                }
-                else{
+                } else {
                     Log.d("adapter error:", "can not get response info!");
                 }
             } catch (IOException e) {
@@ -172,17 +167,17 @@ public class SpeechActivity extends DemoMessagesActivity
         mSpeechManager = new SpeechRecognizerManager(this, new SpeechRecognizerManager.onResultsReady() {
             @Override
             public void onResults(ArrayList<String> results) {
-            if (results != null && results.size() > 0) {
-                res = results.get(0);
-                Log.d("res info00 : ", res);
-                sendSoundInfo(res);
-            } else {
-                //status_tv.setText(getString(R.string.no_results_found));
-            }
-            mSpeechManager.destroy();
-            mSpeechManager = null;
-            input.attachmentButton.setClickable(true);
-            input.attachmentButton.getBackground().setColorFilter(null);
+                if (results != null && results.size() > 0) {
+                    res = results.get(0);
+                    Log.d("res info00 : ", res);
+                    sendSoundInfo(res);
+                } else {
+                    //status_tv.setText(getString(R.string.no_results_found));
+                }
+                mSpeechManager.destroy();
+                mSpeechManager = null;
+                input.attachmentButton.setClickable(true);
+                input.attachmentButton.getBackground().setColorFilter(null);
 
             }
         });
@@ -192,7 +187,7 @@ public class SpeechActivity extends DemoMessagesActivity
         return res;
     }
 
-    private void sendSoundInfo(String info){
+    private void sendSoundInfo(String info) {
         Log.d("sound input", info);
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(info, "0"), true);
@@ -270,9 +265,9 @@ public class SpeechActivity extends DemoMessagesActivity
 
     private void TTS_speak(String speech) {
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
-        AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         int amStreamMusicMaxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol,0 );
+        am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol, 0);
 
         Bundle bundle = new Bundle();
         bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
@@ -281,21 +276,24 @@ public class SpeechActivity extends DemoMessagesActivity
         tts.speak(speech, TextToSpeech.QUEUE_FLUSH, null, null);
     }
 
-    private void checkPermission(){
+    private void checkPermission() {
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//initialise locationManager
         locationListener = new LocationListener() {//initialise locationlistenser
             @Override
             public void onLocationChanged(Location location) {//method check whenever location is updated
                 textView.append("\n" + location.getLatitude() + " " + location.getLongitude());//append textview with location coordinate
             }
+
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {
 
             }
+
             @Override
             public void onProviderEnabled(String provider) {
 
             }
+
             @Override
             public void onProviderDisabled(String provider) {//check if the GPS is turned off
                 Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);//send user to setting interface
