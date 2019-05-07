@@ -191,7 +191,7 @@ public class SpeechActivity extends DemoMessagesActivity
         Log.d("sound input", info);
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(info, "0"), true);
-        ResponseMessage response_Message = new ResponseMessage(input.toString(), super.messagesAdapter);
+        ResponseMessage response_Message = new ResponseMessage(info, super.messagesAdapter);
         Thread th0 = new Thread(response_Message);
         th0.start();
         // TODO find a method to sync

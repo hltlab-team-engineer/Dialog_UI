@@ -18,8 +18,6 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-//import xyz.hiroshifuu.speechapp.R;
-
 import java.io.IOException;
 import java.lang.reflect.Field;
 
