@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 
 import retrofit2.Call;
 import xyz.hiroshifuu.speechapp.commons.HttpUtil;
@@ -82,6 +83,11 @@ public class SpeechActivity extends DemoMessagesActivity
 
         this.messagesList = (MessagesList) this.findViewById(R.id.messagesList2);
         initAdapter();
+
+        String welcome_info = "hello, how can I help you?";
+        super.messagesAdapter.addToStart(
+                MessagesFixtures.getTextMessage(welcome_info, "1"), true);
+//        TTS_speak(welcome_info);
 
         input = (MessageInput) this.findViewById(R.id.input2);
         input.setInputListener(this);
@@ -160,6 +166,41 @@ public class SpeechActivity extends DemoMessagesActivity
             }
         }
     }
+
+//    class ResponseMessage implements Callable<String> {
+//        private String response_str;
+//        private String input;
+//        private MessagesListAdapter messagesAdapter;
+//
+//        ResponseMessage(String input, MessagesListAdapter messagesAdapter) {
+//            this.input = input;
+//            this.messagesAdapter = messagesAdapter;
+//        }
+//
+//        public String getResponse_str() {
+//            return this.response_str;
+//        }
+//
+//        @Override
+//        public String call() {
+//            Call<TextMessage> textInfo = null;
+//            try {
+//                textInfo = httpUtil.getTextMessage(bus, input);
+//                response_str = textInfo.execute().body().getResponse_str();
+//                if (response_str != "") {
+//                    Log.d("textMessage", response_str);
+//                    messagesAdapter.addToStart(
+//                            MessagesFixtures.getTextMessage(response_str, "1"), true);
+//                } else {
+//                    Log.d("adapter error:", "can not get response info!");
+//                }
+//                return response_str;
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            return response_str;
+//        }
+//    }
 
     private String SetSpeechListener() {
         res = "";
@@ -260,7 +301,9 @@ public class SpeechActivity extends DemoMessagesActivity
         Bundle b = getIntent().getExtras();
         if (b != null)
             bus = b.getString("bus");
+        String welcome_info = "hello, how can I help you?";
 //        TTS_speak("TTS is ready, Bus ID is : " + bus);
+        TTS_speak(welcome_info);
     }
 
     private void TTS_speak(String speech) {
