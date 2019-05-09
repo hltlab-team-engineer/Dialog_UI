@@ -22,7 +22,7 @@ import io.github.ponnamkarthik.richlinkpreview.RichLinkView;
 import io.github.ponnamkarthik.richlinkpreview.RichPreview;
 import io.github.ponnamkarthik.richlinkpreview.ViewListener;
 import xyz.hiroshifuu.speechapp.R;
-import xyz.hiroshifuu.speechapp.common.SpeechItem;
+import xyz.hiroshifuu.speechapp.commons.SpeechItem;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -51,20 +51,20 @@ public class CustomAdapter extends ArrayAdapter<SpeechItem> {
             if (!item.isMap())
                 convertView = inflater.inflate(R.layout.list_item_res, parent, false);
             else {
-//                convertView = inflater.inflate(R.layout.list_item_map, parent, false);
-//                final RichLinkView richLinkView = (RichLinkView) convertView.findViewById(R.id.richLinkView);
-//                richLinkView.setLink(item.getText(), new ViewListener() {
-//
-//                    @Override
-//                    public void onSuccess(boolean status) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onError(Exception e) {
-//
-//                    }
-//                });
+                convertView = inflater.inflate(R.layout.list_item_map, parent, false);
+                final RichLinkView richLinkView = (RichLinkView) convertView.findViewById(R.id.richLinkView);
+                richLinkView.setLink(item.getText(), new ViewListener() {
+
+                    @Override
+                    public void onSuccess(boolean status) {
+
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+
+                    }
+                });
                 convertView = inflater.inflate(R.layout.list_item_map2, parent, false);
                 main_url = item.getText();
                 final LinearLayout linearLayout = (LinearLayout) convertView.findViewById(R.id.rich_link_card);

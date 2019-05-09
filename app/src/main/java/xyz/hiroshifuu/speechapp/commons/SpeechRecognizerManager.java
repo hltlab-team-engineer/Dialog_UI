@@ -1,4 +1,4 @@
-package xyz.hiroshifuu.speechapp.common;
+package xyz.hiroshifuu.speechapp.commons;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +11,8 @@ import android.speech.SpeechRecognizer;
 import android.util.Log;
 
 import java.util.ArrayList;
+
+import xyz.hiroshifuu.speechapp.activity.SpeechActivity;
 
 public class SpeechRecognizerManager {
 
@@ -25,7 +27,7 @@ public class SpeechRecognizerManager {
 
     private onResultsReady mListener;
 
-    public SpeechRecognizerManager(Context context, onResultsReady listener) {
+    public SpeechRecognizerManager(SpeechActivity context, onResultsReady listener) {
         try {
             mListener = listener;
         } catch (ClassCastException e) {

@@ -6,4 +6,5 @@
     <color name="button_pressed">#00ff8a</color>
     <color name="button_focused">#00ff8a</color>
     <color name="button_default">#162acf</color>
+    <color name="gray_light">#e8e8e8</color>
 </resources>

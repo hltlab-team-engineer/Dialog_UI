@@ -1,7 +1,8 @@
-package xyz.hiroshifuu.speechapp.common;
+package xyz.hiroshifuu.speechapp.commons;
 
 
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -73,6 +74,7 @@ public class Client extends AsyncTask<String,Void,String> {
     private void connectWithServer() {
         try {
             if (socket == null) {
+                Log.d("create new socket: ", "connectWithServer");
                 socket = new Socket(dstAddress, dstPort);
                 out = new PrintWriter(socket.getOutputStream());
                 inputStream = socket.getInputStream();
@@ -100,6 +102,13 @@ public class Client extends AsyncTask<String,Void,String> {
     public void sendDataWithString(String message) {
         if (message != null) {
             connectWithServer();
+            Log.d("send data: ", message);
+            try {
+                Log.d("send data: ", socket.getOutputStream().toString());
+            }
+            catch (Exception e){
+                Log.d("can,t get output stream",e.getMessage());
+            }
             out.write(message);
             out.flush();
         }

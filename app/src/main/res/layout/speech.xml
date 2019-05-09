@@ -7,56 +7,15 @@
     android:layout_height="match_parent"
     tools:ignore="ExtraText">
 
-    <!--android.support.v7.widget.RecyclerView
-        android:id="@+id/conversation"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/result_tv2"
-        android:textSize="16sp" /-->
-    <!--<TextView
-        android:id="@+id/status_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="104dp"
-        android:text="Speech App"
-        android:textColor="#1a4067"
-        android:textSize="24sp"
-        android:textStyle="italic" /> -->
 
-    <!--<TextView-->
-    <!--android:id="@+id/result_tv"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_alignParentTop="true"-->
-    <!--android:layout_centerHorizontal="true"-->
-    <!--android:layout_marginTop="173dp"-->
-    <!--android:text="Demo"-->
-    <!--android:textColor="#1a4067"-->
-    <!--android:textSize="24sp"-->
-    <!--android:textStyle="italic" />-->
-
-    <!--<TextView-->
-    <!--android:id="@+id/result_server_tv"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_alignParentBottom="true"-->
-    <!--android:layout_centerHorizontal="true"-->
-    <!--android:layout_marginBottom="186dp"-->
-    <!--android:text="Server"-->
-    <!--android:textColor="#1a4067"-->
-    <!--android:textSize="24sp"-->
-    <!--android:textStyle="italic" />-->
 
     <Button
         android:id="@+id/start_listen_btn"
         android:layout_width="56dp"
         android:layout_height="44dp"
-        android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-
-        android:layout_marginEnd="355dp"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="16dp"
         android:layout_marginBottom="2dp"
         android:background="@drawable/microphone"
         android:textColor="#1a4067"
@@ -74,24 +33,6 @@
         android:imeOptions="actionSend"
         android:inputType="textPersonName"
         tools:text="Type in a question..." />
-
-    <!--Button
-        android:id="@+id/location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/start_listen_btn"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="-1dp"
-        android:layout_marginEnd="0dp"
-        android:text="Location" />
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="120dp"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/result_tv2"
-        android:layout_alignStart="@+id/location"
-        android:layout_marginStart="-10dp"
-        android:layout_marginBottom="-10dp" /-->
 
     <ScrollView
         android:id="@+id/scrollview"

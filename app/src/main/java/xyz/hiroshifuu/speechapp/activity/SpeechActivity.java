@@ -1,7 +1,6 @@
 package xyz.hiroshifuu.speechapp.activity;
 
 import android.Manifest;
-//import android.support.v7.widget.RecyclerView;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -14,282 +13,255 @@ import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.view.KeyEvent;
+import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Properties;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
-import xyz.hiroshifuu.speechapp.common.Client;
-import xyz.hiroshifuu.speechapp.adapter.CustomAdapter;
-import xyz.hiroshifuu.speechapp.common.PermissionHandler;
+import retrofit2.Call;
+import xyz.hiroshifuu.speechapp.commons.HttpUtil;
+import xyz.hiroshifuu.speechapp.commons.PermissionHandler;
+import xyz.hiroshifuu.speechapp.commons.SpeechRecognizerManager;
+import xyz.hiroshifuu.speechapp.messages.MessageInput;
+import xyz.hiroshifuu.speechapp.messages.MessagesList;
+import xyz.hiroshifuu.speechapp.messages.MessagesListAdapter;
+
+import xyz.hiroshifuu.speechapp.commons.AppUtils;
+import xyz.hiroshifuu.speechapp.commons.Message;
 import xyz.hiroshifuu.speechapp.R;
-import xyz.hiroshifuu.speechapp.common.SpeechItem;
-import xyz.hiroshifuu.speechapp.common.SpeechRecognizerManager;
+import xyz.hiroshifuu.speechapp.commons.ProperUtil;
+import xyz.hiroshifuu.speechapp.commons.MessagesFixtures;
+import xyz.hiroshifuu.speechapp.models.TextMessage;
+import xyz.hiroshifuu.speechapp.utils.RetrofitClientInstance;
 
-import java.util.Arrays;
-public class SpeechActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
+public class SpeechActivity extends DemoMessagesActivity
+        implements MessageInput.InputListener,
+        MessageInput.TypingListener,
+        TextToSpeech.OnInitListener {
 
-    private static final int SERVERPORT = 5588;
-    private static final String SERVER_IP = "18.136.239.195";
-    //private TextView status_tv;
-    private TextView result_tv;
-    private EditText result_tv2;
-    private TextView result_server_tv;
-    private Button start_listen_btn;
-    Client myClient = null;
-    private SpeechRecognizerManager mSpeechManager;
+    private Properties my_property;
+
     private TextToSpeech tts;
-    private String bus = "No bus";
-    public String qryresp, res;
-    private Button location; //Press to send location to server
+    private String bus = "NO_BUS";
+    public String res;
     private TextView textView; //Show location in textview
     private LocationManager locationManager; //instance to access location services
     private LocationListener locationListener;//listen for location changes
-    private ListView listView;
-    private ArrayList<SpeechItem> listItems;
 
-    final Handler handler = new Handler();
+    private MessagesList messagesList;
+    private SpeechRecognizerManager mSpeechManager;
+    private MessageInput input;
+    private Activity that;
 
-    //new added
-   // RecyclerView recyclerView;
-   // MessageAdapter messageAdapter;
+    private HttpUtil httpUtil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.avtive_chat_dialog);
 
-        setContentView(R.layout.speech);
-        findViews();
-        setClickListeners();
+        my_property = ProperUtil.getPropertiesURL(getApplicationContext());
+        String base_url = my_property.getProperty("serverUrl");
+        String port = my_property.getProperty("port");
+        String path = base_url + ":" + port + "/";
+        Log.d("path", path);
+
+        httpUtil = RetrofitClientInstance.getRetrofitInstance(path).create(HttpUtil.class);
 
         tts = new TextToSpeech(getApplicationContext(), this);
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//initialise locationManager
-        locationListener = new LocationListener() {//initialise locationlistenser
 
-            @Override
-            public void onLocationChanged(Location location) {//method check whenever location is updated
-                textView.append("\n" + location.getLatitude() + " " + location.getLongitude());//append textview with location coordinate
-            }
+        this.messagesList = (MessagesList) this.findViewById(R.id.messagesList2);
+        initAdapter();
 
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
+        String welcome_info = "hello, how can I help you?";
+        super.messagesAdapter.addToStart(
+                MessagesFixtures.getTextMessage(welcome_info, "1"), true);
+//        TTS_speak(welcome_info);
 
-            }
+        input = (MessageInput) this.findViewById(R.id.input2);
+        input.setInputListener(this);
+        input.setTypingListener(this);
 
-            @Override
-            public void onProviderEnabled(String provider) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {//check if the GPS is turned off
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);//send user to setting interface
-                startActivity(intent);
-            }
-        };
-            //add user permission check
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(new String[]{
-                        Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.INTERNET
-                }, 10);//request code is a integer, indicator for permission
-            }
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-        }
-
-
-        listView = findViewById(R.id.list);
-        listItems = new ArrayList<SpeechItem>();
-        SpeechItem item;
-        String qrystr = "Hello, How can I assist you?: Do you have queries related to? ";
-        String qrystr1= "- Bus route \n -Other rules and regulations";
-        item = new SpeechItem(qrystr, false, false);
-        listItems.add(item);
-        ArrayAdapter ad = new CustomAdapter(listItems, getApplicationContext());
-        listView.setAdapter(ad);
-        TTS_speak(qrystr);
-        listItems.add(new SpeechItem(qrystr1, false, false));
-        ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
-
-
-    }
-
-
-
-    @Override
-    //handle the request permission result
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case 10://same as integer above
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        locationManager.requestLocationUpdates("network", 1000, 0, locationListener);
-                        //configureButton();
-                    }
-                }
-        }
-    }
-
-    private void configureButton() {
-        location.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String loc = textView.getText().toString();
-                Client myClient = new Client(SERVER_IP, SERVERPORT, loc);//send location to sever
-                myClient.execute();
-            }
-        });
-    }
-
-    private void findViews() {
-        //status_tv = findViewById(R.id.status_tv);
-
-        //-----------------------------
-       // recyclerView = findViewById(R.id.conversation);
-
-        //new added above
-        result_tv = findViewById(R.id.result_tv);
-        result_tv2 = findViewById(R.id.result_tv2);
-
-        result_tv2.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                boolean handled = false;
-                if (actionId == EditorInfo.IME_ACTION_SEND) {
-                    sendMessage(result_tv2.getText().toString());
-                    handled = true;
-                    result_tv2.setText("");
-
-                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(result_tv2.getWindowToken(), 0);
-                }
-                return handled;
-            }
-        });
-
-        result_server_tv = findViewById(R.id.result_server_tv);
-        start_listen_btn = findViewById(R.id.start_listen_btn);
-        //location = findViewById(R.id.location);
-       // textView = findViewById(R.id.textView);//location results
-    }
-
-    private void setClickListeners() {
-        final Activity that = this;
-        start_listen_btn.setOnClickListener(new View.OnClickListener() {
+        input.attachmentButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (PermissionHandler.checkPermission(that, PermissionHandler.RECORD_AUDIO)) {
-                    switch (v.getId()) {
-                        case R.id.start_listen_btn:
-                            if (mSpeechManager == null) {
-                                SetSpeechListener();
-                            } else if (!mSpeechManager.ismIsListening()) {
-                                mSpeechManager.destroy();
-                                SetSpeechListener();
-                            }
-                            //status_tv.setText(getString(R.string.you_may_speak));
-                            start_listen_btn.setClickable(false);
-                            start_listen_btn.getBackground().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
-                            break;
+
+                    if (mSpeechManager == null) {
+                        SetSpeechListener();
+                    } else if (!mSpeechManager.ismIsListening()) {
+                        mSpeechManager.destroy();
+                        SetSpeechListener();
                     }
+                    //status_tv.setText(getString(R.string.you_may_speak));
+                    input.attachmentButton.setClickable(false);
+                    input.attachmentButton.getBackground().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
+
                 } else {
                     PermissionHandler.askForPermission(PermissionHandler.RECORD_AUDIO, that);
                 }
             }
         });
+
+        checkPermission();
+        that = this;
     }
 
-    private void sendMessage(String text) {
+    @Override
+    public boolean onSubmit(final CharSequence input, final String userID) throws IOException {
+        super.messagesAdapter.addToStart(
+                MessagesFixtures.getTextMessage(input.toString(), userID), true);
 
-        listItems.add(new SpeechItem(text, true, false));
-        ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
+
+        ExecutorService executor = Executors.newCachedThreadPool();
+        ResponseMessage response_Message = new ResponseMessage(input.toString(), bus);
+        Future<String> result = executor.submit(response_Message);
+
         try {
-            myClient = new Client(SERVER_IP, SERVERPORT, text);
-            qryresp = myClient.execute().get();
-        }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
-        catch (ExecutionException e)
-        {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        qryresp = qryresp.replace("\\n","\n");
-        if(qryresp.contains("::")) {
-            List<String> result = Arrays.asList(qryresp.split("\\s*::\\s*"));
-            String q1 = result.get(0);
-            String q2 = result.get(1);
-
-            TTS_speak(q1);
-            listItems.add(new SpeechItem(q1, false, false));
-            ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
-            listItems.add(new SpeechItem(q2, false, false));
-            ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
-
+        String response_str = "";
+        try {
+            response_str = result.get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-        else {
-            TTS_speak(qryresp);
-            listItems.add(new SpeechItem(qryresp, false, false));
-            ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
+        if (response_str != "") {
+            Log.d("textMessage", response_str);
+            super.messagesAdapter.addToStart(
+                    MessagesFixtures.getTextMessage(response_str, "1"), true);
+        } else {
+            Log.d("adapter error:", "can not get response info!");
         }
-        /* (To be used for google map)
-       SpeechItem item = new SpeechItem("https://www.google.com/maps/dir/?api=1&origin=Sembwang&destination=Clementi&travelmode=bus", false, true);
-       listItems.add(item);
-        */
 
-        final ScrollView scrollview = (findViewById(R.id.scrollview));
-        scrollview.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                scrollview.fullScroll(ScrollView.FOCUS_DOWN);
-            }
-        },100);
+        return true;
     }
 
-    private void SetSpeechListener() {
+    class ResponseMessage implements Callable<String> {
+        private String response_str;
+        private String input;
+        private String bus_id;
+
+        ResponseMessage(String input, String bus_id) {
+            this.input = input;
+            this.bus_id = bus_id;
+        }
+
+        @Override
+        public String call() {
+            Call<TextMessage> textInfo = null;
+            response_str = "";
+            try {
+                textInfo = httpUtil.getTextMessage(bus, input);
+                response_str = textInfo.execute().body().getResponse_str();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return response_str;
+        }
+    }
+
+    private String SetSpeechListener() {
+        res = "";
+        Log.d("start speech", "start speech");
         mSpeechManager = new SpeechRecognizerManager(this, new SpeechRecognizerManager.onResultsReady() {
             @Override
             public void onResults(ArrayList<String> results) {
                 if (results != null && results.size() > 0) {
                     res = results.get(0);
-                    sendMessage(res);
+                    Log.d("res info00 : ", res);
+                    sendSoundInfo(res);
                 } else {
                     //status_tv.setText(getString(R.string.no_results_found));
                 }
-                //status_tv.setText(getString(R.string.destroied));
                 mSpeechManager.destroy();
                 mSpeechManager = null;
-                start_listen_btn.setClickable(true);
-                start_listen_btn.getBackground().setColorFilter(null);
+                input.attachmentButton.setClickable(true);
+                input.attachmentButton.getBackground().setColorFilter(null);
+
             }
         });
+
+        Log.d("after sound", "after sound");
+
+        return res;
+    }
+
+    private void sendSoundInfo(String info) {
+        Log.d("sound input", info);
+        super.messagesAdapter.addToStart(
+                MessagesFixtures.getTextMessage(info, "0"), true);
+        ExecutorService executor = Executors.newCachedThreadPool();
+        ResponseMessage response_Message = new ResponseMessage(info, bus);
+        Future<String> result = executor.submit(response_Message);
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        String response_str = "";
+        try {
+            response_str = result.get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (response_str != "") {
+            Log.d("textMessage", response_str);
+            super.messagesAdapter.addToStart(
+                    MessagesFixtures.getTextMessage(response_str, "1"), true);
+        } else {
+            Log.d("adapter error:", "can not get response info!");
+        }
+
+    }
+
+    private void initAdapter() {
+        super.messagesAdapter = new MessagesListAdapter<>(super.senderId, super.imageLoader);
+        super.messagesAdapter.enableSelectionMode(this);
+        super.messagesAdapter.setLoadMoreListener(this);
+        super.messagesAdapter.registerViewClickListener(R.id.messageUserAvatar,
+                new MessagesListAdapter.OnMessageViewClickListener<Message>() {
+                    @Override
+                    public void onMessageViewClick(View view, Message message) {
+                        AppUtils.showToast(SpeechActivity.this,
+                                message.getUser().getName() + " avatar click",
+                                false);
+                    }
+                });
+        this.messagesList.setAdapter(super.messagesAdapter);
+    }
+
+    @Override
+    public void onStartTyping() {
+        Log.v("Typing listener", getString(R.string.start_typing_status));
+    }
+
+    @Override
+    public void onStopTyping() {
+        Log.v("Typing listener", getString(R.string.stop_typing_status));
     }
 
     @Override
@@ -299,7 +271,6 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
             mSpeechManager = null;
         }
         super.onPause();
-
         if (tts != null) {
             tts.shutdown();
         }
@@ -324,17 +295,16 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
         Bundle b = getIntent().getExtras();
         if (b != null)
             bus = b.getString("bus");
-        //TTS_speak("TTS is ready, Bus ID is : " + bus);
-        String qrystr = "Hello, How can I assist you?: Do you have queries related to? ";
-
-        TTS_speak(qrystr);
+        String welcome_info = "hello, how can I help you?";
+//        TTS_speak("TTS is ready, Bus ID is : " + bus);
+//        TTS_speak(welcome_info);
     }
 
     private void TTS_speak(String speech) {
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
-        AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         int amStreamMusicMaxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol,0 );
+        am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol, 0);
 
         Bundle bundle = new Bundle();
         bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
@@ -342,4 +312,56 @@ public class SpeechActivity extends AppCompatActivity implements TextToSpeech.On
 
         tts.speak(speech, TextToSpeech.QUEUE_FLUSH, null, null);
     }
+
+    private void checkPermission() {
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//initialise locationManager
+        locationListener = new LocationListener() {//initialise locationlistenser
+            @Override
+            public void onLocationChanged(Location location) {//method check whenever location is updated
+                textView.append("\n" + location.getLatitude() + " " + location.getLongitude());//append textview with location coordinate
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {//check if the GPS is turned off
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);//send user to setting interface
+                startActivity(intent);
+            }
+        };
+        //add user permission check
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.INTERNET
+                }, 10);//request code is a integer, indicator for permission
+            }
+
+        }
+    }
+
+    @Override
+    //handle the request permission result
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case 10://same as integer above
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        locationManager.requestLocationUpdates("network", 1000, 0, locationListener);
+                        //configureButton();
+                    }
+                }
+        }
+    }
+
 }
+

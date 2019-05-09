@@ -1,4 +1,4 @@
-package xyz.hiroshifuu.speechapp.common;
+package xyz.hiroshifuu.speechapp.commons;
 
 public class SpeechItem {
     private String text;
