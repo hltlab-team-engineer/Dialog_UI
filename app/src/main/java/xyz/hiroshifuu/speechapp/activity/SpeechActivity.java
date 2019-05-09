@@ -1,6 +1,5 @@
 package xyz.hiroshifuu.speechapp.activity;
 
-
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
@@ -28,6 +27,10 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import retrofit2.Call;
 import xyz.hiroshifuu.speechapp.commons.HttpUtil;
@@ -121,86 +124,60 @@ public class SpeechActivity extends DemoMessagesActivity
     public boolean onSubmit(final CharSequence input, final String userID) throws IOException {
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(input.toString(), userID), true);
-        ResponseMessage response_Message = new ResponseMessage(input.toString(), super.messagesAdapter);
-        Thread th0 = new Thread(response_Message);
-        th0.start();
-        // TODO find a method to sync
+
+
+        ExecutorService executor = Executors.newCachedThreadPool();
+        ResponseMessage response_Message = new ResponseMessage(input.toString(), bus);
+        Future<String> result = executor.submit(response_Message);
+
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
+        String response_str = "";
+        try {
+            response_str = result.get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (response_str != "") {
+            Log.d("textMessage", response_str);
+            super.messagesAdapter.addToStart(
+                    MessagesFixtures.getTextMessage(response_str, "1"), true);
+        } else {
+            Log.d("adapter error:", "can not get response info!");
+        }
+
         return true;
     }
 
-    class ResponseMessage implements Runnable {
+    class ResponseMessage implements Callable<String> {
         private String response_str;
         private String input;
-        private MessagesListAdapter messagesAdapter;
+        private String bus_id;
 
-        ResponseMessage(String input, MessagesListAdapter messagesAdapter) {
+        ResponseMessage(String input, String bus_id) {
             this.input = input;
-            this.messagesAdapter = messagesAdapter;
-        }
-
-        public String getResponse_str() {
-            return this.response_str;
+            this.bus_id = bus_id;
         }
 
         @Override
-        public void run() {
+        public String call() {
             Call<TextMessage> textInfo = null;
+            response_str = "";
             try {
                 textInfo = httpUtil.getTextMessage(bus, input);
                 response_str = textInfo.execute().body().getResponse_str();
-                if (response_str != "") {
-                    Log.d("textMessage", response_str);
-                    messagesAdapter.addToStart(
-                            MessagesFixtures.getTextMessage(response_str, "1"), true);
-                } else {
-                    Log.d("adapter error:", "can not get response info!");
-                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            return response_str;
         }
     }
-
-//    class ResponseMessage implements Callable<String> {
-//        private String response_str;
-//        private String input;
-//        private MessagesListAdapter messagesAdapter;
-//
-//        ResponseMessage(String input, MessagesListAdapter messagesAdapter) {
-//            this.input = input;
-//            this.messagesAdapter = messagesAdapter;
-//        }
-//
-//        public String getResponse_str() {
-//            return this.response_str;
-//        }
-//
-//        @Override
-//        public String call() {
-//            Call<TextMessage> textInfo = null;
-//            try {
-//                textInfo = httpUtil.getTextMessage(bus, input);
-//                response_str = textInfo.execute().body().getResponse_str();
-//                if (response_str != "") {
-//                    Log.d("textMessage", response_str);
-//                    messagesAdapter.addToStart(
-//                            MessagesFixtures.getTextMessage(response_str, "1"), true);
-//                } else {
-//                    Log.d("adapter error:", "can not get response info!");
-//                }
-//                return response_str;
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            return response_str;
-//        }
-//    }
 
     private String SetSpeechListener() {
         res = "";
@@ -232,14 +209,30 @@ public class SpeechActivity extends DemoMessagesActivity
         Log.d("sound input", info);
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(info, "0"), true);
-        ResponseMessage response_Message = new ResponseMessage(info, super.messagesAdapter);
-        Thread th0 = new Thread(response_Message);
-        th0.start();
-        // TODO find a method to sync
+        ExecutorService executor = Executors.newCachedThreadPool();
+        ResponseMessage response_Message = new ResponseMessage(info, bus);
+        Future<String> result = executor.submit(response_Message);
+
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+
+        String response_str = "";
+        try {
+            response_str = result.get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (response_str != "") {
+            Log.d("textMessage", response_str);
+            super.messagesAdapter.addToStart(
+                    MessagesFixtures.getTextMessage(response_str, "1"), true);
+        } else {
+            Log.d("adapter error:", "can not get response info!");
         }
 
     }
@@ -303,7 +296,7 @@ public class SpeechActivity extends DemoMessagesActivity
             bus = b.getString("bus");
         String welcome_info = "hello, how can I help you?";
 //        TTS_speak("TTS is ready, Bus ID is : " + bus);
-        TTS_speak(welcome_info);
+//        TTS_speak(welcome_info);
     }
 
     private void TTS_speak(String speech) {
