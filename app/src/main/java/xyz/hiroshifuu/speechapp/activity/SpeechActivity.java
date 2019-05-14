@@ -1,6 +1,7 @@
 package xyz.hiroshifuu.speechapp.activity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +12,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -19,6 +21,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,6 +72,9 @@ public class SpeechActivity extends DemoMessagesActivity
 
     private HttpUtil httpUtil;
 
+    private ImageButton callPhone;
+
+    @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,6 +122,23 @@ public class SpeechActivity extends DemoMessagesActivity
             }
         });
 
+        callPhone  =  findViewById(R.id.call_phone);
+
+        callPhone.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                Log.d("press call phone", "pressed");
+                Intent callIntent = new Intent(Intent.ACTION_CALL);
+                callIntent.setData(Uri.parse("tel:85443713"));
+
+//                if (ActivityCompat.checkSelfPermission(SpeechActivity.this,
+//                        Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+//                    Log.d("press call phone", "can not call ");
+//                    return;
+//                }
+                Log.d("press call phone", "start activity");
+                startActivity(callIntent);
+            }
+        });
         checkPermission();
         that = this;
     }
