@@ -1,6 +1,7 @@
 package xyz.hiroshifuu.speechapp.activity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -11,14 +12,17 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -70,6 +74,12 @@ public class SpeechActivity extends DemoMessagesActivity
 
     private HttpUtil httpUtil;
 
+    private ImageButton callPhone;
+    private int requestCode;
+    private String[] permissions;
+    private int[] grantResults;
+
+    @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,9 +127,64 @@ public class SpeechActivity extends DemoMessagesActivity
             }
         });
 
+        callPhone  =  findViewById(R.id.call_phone);
+
+        callPhone.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.M)
+            public void onClick(View arg0) {
+                Log.d("press call phone", "pressed");
+                if (!hasPermission()) {
+                    Log.d("press call phone", "can not call ");
+                    int curApiVersion = Build.VERSION.SDK_INT;
+                    if (curApiVersion >= Build.VERSION_CODES.M) {
+                        requestPermissions(
+                                new String[] { Manifest.permission.CALL_PHONE },
+                                0x11);
+//                        intentToCall("85443713");
+                    } else {
+                        intentToCall("85443713");
+                    }
+                } else {
+                    intentToCall("85443713");
+                }
+            }
+        });
         checkPermission();
         that = this;
     }
+
+    private boolean hasPermission() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            return false;
+        }
+        return true;
+    }
+
+    private void intentToCall(String phoneNumber) {
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        Uri data = Uri.parse("tel:" + phoneNumber);
+        intent.setData(data);
+        startActivity(intent);
+    }
+
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode,
+//                                           String[] permissions, int[] grantResults) {
+//        this.requestCode = requestCode;
+//        this.permissions = permissions;
+//        this.grantResults = grantResults;
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        if (requestCode == 0x11) {
+//            // If request is cancelled, the result arrays are empty.
+//            if (grantResults.length > 0
+//                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                String phone = "85443713";
+//                intentToCall(phone);
+//            } else {
+//                Log.d("receive permission","can not receive");
+//            }
+//        }
+//    }
 
     @Override
     public boolean onSubmit(final CharSequence input, final String userID) throws IOException {
