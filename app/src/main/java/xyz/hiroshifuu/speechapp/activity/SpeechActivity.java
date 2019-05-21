@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
@@ -73,6 +74,9 @@ public class SpeechActivity extends DemoMessagesActivity
     private HttpUtil httpUtil;
 
     private ImageButton callPhone;
+    private int requestCode;
+    private String[] permissions;
+    private int[] grantResults;
 
     @SuppressLint("WrongViewCast")
     @Override
@@ -125,23 +129,61 @@ public class SpeechActivity extends DemoMessagesActivity
         callPhone  =  findViewById(R.id.call_phone);
 
         callPhone.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.M)
             public void onClick(View arg0) {
                 Log.d("press call phone", "pressed");
-                Intent callIntent = new Intent(Intent.ACTION_CALL);
-                callIntent.setData(Uri.parse("tel:85443713"));
-
-//                if (ActivityCompat.checkSelfPermission(SpeechActivity.this,
-//                        Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-//                    Log.d("press call phone", "can not call ");
-//                    return;
-//                }
-                Log.d("press call phone", "start activity");
-                startActivity(callIntent);
+                if (!hasPermission()) {
+                    Log.d("press call phone", "can not call ");
+                    int curApiVersion = Build.VERSION.SDK_INT;
+                    if (curApiVersion >= Build.VERSION_CODES.M) {
+                        requestPermissions(
+                                new String[] { Manifest.permission.CALL_PHONE },
+                                0x11);
+//                        intentToCall("85443713");
+                    } else {
+                        intentToCall("85443713");
+                    }
+                } else {
+                    intentToCall("85443713");
+                }
             }
         });
         checkPermission();
         that = this;
     }
+
+    private boolean hasPermission() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            return false;
+        }
+        return true;
+    }
+
+    private void intentToCall(String phoneNumber) {
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        Uri data = Uri.parse("tel:" + phoneNumber);
+        intent.setData(data);
+        startActivity(intent);
+    }
+
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode,
+//                                           String[] permissions, int[] grantResults) {
+//        this.requestCode = requestCode;
+//        this.permissions = permissions;
+//        this.grantResults = grantResults;
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        if (requestCode == 0x11) {
+//            // If request is cancelled, the result arrays are empty.
+//            if (grantResults.length > 0
+//                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                String phone = "85443713";
+//                intentToCall(phone);
+//            } else {
+//                Log.d("receive permission","can not receive");
+//            }
+//        }
+//    }
 
     @Override
     public boolean onSubmit(final CharSequence input, final String userID) throws IOException {
