@@ -212,8 +212,9 @@ public class SpeechActivity extends DemoMessagesActivity
         if (response_str != "") {
             String[] response_strs = response_str.split("::\\\\n");
             for(int index = 0; index < response_strs.length; index++){
+                String newText = response_strs[index].replace("\\n","\n");
                 super.messagesAdapter.addToStart(
-                        MessagesFixtures.getTextMessage(response_strs[index], "1"), true);
+                        MessagesFixtures.getTextMessage(newText, "1"), true);
             }
 
         } else {
@@ -305,8 +306,9 @@ public class SpeechActivity extends DemoMessagesActivity
             Log.d("textMessage", response_str);
             String[] response_strs = response_str.split("::\\\\n");
             for(int index=0; index < response_strs.length; index++){
+                String newText = response_strs[index].replace("\\n","\n");
                 super.messagesAdapter.addToStart(
-                        MessagesFixtures.getTextMessage(response_strs[index], "1"), true);
+                        MessagesFixtures.getTextMessage(newText, "1"), true);
             }
         } else {
             Log.d("adapter error:", "can not get response info!");
