@@ -210,9 +210,12 @@ public class SpeechActivity extends DemoMessagesActivity
             e.printStackTrace();
         }
         if (response_str != "") {
-            Log.d("textMessage", response_str);
-            super.messagesAdapter.addToStart(
-                    MessagesFixtures.getTextMessage(response_str, "1"), true);
+            String[] response_strs = response_str.split("::\\\\n");
+            for(int index = 0; index < response_strs.length; index++){
+                super.messagesAdapter.addToStart(
+                        MessagesFixtures.getTextMessage(response_strs[index], "1"), true);
+            }
+
         } else {
             Log.d("adapter error:", "can not get response info!");
         }
@@ -300,8 +303,11 @@ public class SpeechActivity extends DemoMessagesActivity
         }
         if (response_str != "") {
             Log.d("textMessage", response_str);
-            super.messagesAdapter.addToStart(
-                    MessagesFixtures.getTextMessage(response_str, "1"), true);
+            String[] response_strs = response_str.split("::\\\\n");
+            for(int index=0; index < response_strs.length; index++){
+                super.messagesAdapter.addToStart(
+                        MessagesFixtures.getTextMessage(response_strs[index], "1"), true);
+            }
         } else {
             Log.d("adapter error:", "can not get response info!");
         }
