@@ -196,11 +196,11 @@ public class SpeechActivity extends DemoMessagesActivity
         ResponseMessage response_Message = new ResponseMessage(input.toString(), bus);
         Future<String> result = executor.submit(response_Message);
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Thread.sleep(1000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
 
         String response_str = "";
         try {
@@ -211,9 +211,13 @@ public class SpeechActivity extends DemoMessagesActivity
             e.printStackTrace();
         }
         if (response_str != "") {
-            Log.d("textMessage", response_str);
-            super.messagesAdapter.addToStart(
-                    MessagesFixtures.getTextMessage(response_str, "1"), true);
+            String[] response_strs = response_str.split("::\\\\n");
+            for(int index = 0; index < response_strs.length; index++){
+                String newText = response_strs[index].replace("\\n","\n");
+                super.messagesAdapter.addToStart(
+                        MessagesFixtures.getTextMessage(newText, "1"), true);
+            }
+
         } else {
             Log.d("adapter error:", "can not get response info!");
         }
@@ -254,7 +258,7 @@ public class SpeechActivity extends DemoMessagesActivity
                 if (results != null && results.size() > 0) {
                     res = results.get(0);
                     Log.d("res info00 : ", res);
-                    sendSoundInfo(res);
+                    sendSoundInfo2(res);
                 } else {
                     //status_tv.setText(getString(R.string.no_results_found));
                 }
@@ -271,19 +275,25 @@ public class SpeechActivity extends DemoMessagesActivity
         return res;
     }
 
-    private void sendSoundInfo(String info) {
+    private void sendSoundInfo2(String info){
         Log.d("sound input", info);
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(info, "0"), true);
+        sendSoundInfo(info);
+    }
+    private void sendSoundInfo(String info) {
+//        Log.d("sound input", info);
+//        super.messagesAdapter.addToStart(
+//                MessagesFixtures.getTextMessage(info, "0"), true);
         ExecutorService executor = Executors.newCachedThreadPool();
         ResponseMessage response_Message = new ResponseMessage(info, bus);
         Future<String> result = executor.submit(response_Message);
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Thread.sleep(1000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
 
         String response_str = "";
         try {
@@ -295,8 +305,12 @@ public class SpeechActivity extends DemoMessagesActivity
         }
         if (response_str != "") {
             Log.d("textMessage", response_str);
-            super.messagesAdapter.addToStart(
-                    MessagesFixtures.getTextMessage(response_str, "1"), true);
+            String[] response_strs = response_str.split("::\\\\n");
+            for(int index=0; index < response_strs.length; index++){
+                String newText = response_strs[index].replace("\\n","\n");
+                super.messagesAdapter.addToStart(
+                        MessagesFixtures.getTextMessage(newText, "1"), true);
+            }
         } else {
             Log.d("adapter error:", "can not get response info!");
         }
