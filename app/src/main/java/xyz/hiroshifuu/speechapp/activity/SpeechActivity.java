@@ -98,10 +98,14 @@ public class SpeechActivity extends DemoMessagesActivity
         this.messagesList = (MessagesList) this.findViewById(R.id.messagesList2);
         initAdapter();
 
-        String welcome_info = "hello, how can I help you?";
+        String welcome_info = "hello, how can I help you? What kind of information do you want to know?";
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(welcome_info, "1"), true);
-//        TTS_speak(welcome_info);
+        welcome_info = "-Bus route \n -Bus rules";
+        super.messagesAdapter.addToStart(
+                MessagesFixtures.getTextMessage(welcome_info, "1"), true);
+
+        //        TTS_speak(welcome_info);
 
         input = (MessageInput) this.findViewById(R.id.input2);
         input.setInputListener(this);
@@ -216,6 +220,11 @@ public class SpeechActivity extends DemoMessagesActivity
                 String newText = response_strs[index].replace("\\n","\n");
                 super.messagesAdapter.addToStart(
                         MessagesFixtures.getTextMessage(newText, "1"), true);
+                if (index==0)
+                {
+                    TTS_speak(newText);
+                }
+                Log.d("TTS speak debug:", newText);
             }
 
         } else {
@@ -310,6 +319,10 @@ public class SpeechActivity extends DemoMessagesActivity
                 String newText = response_strs[index].replace("\\n","\n");
                 super.messagesAdapter.addToStart(
                         MessagesFixtures.getTextMessage(newText, "1"), true);
+                if (index==0)
+                {
+                    TTS_speak(newText);
+                }
             }
         } else {
             Log.d("adapter error:", "can not get response info!");
@@ -374,9 +387,9 @@ public class SpeechActivity extends DemoMessagesActivity
         Bundle b = getIntent().getExtras();
         if (b != null)
             bus = b.getString("bus");
-        String welcome_info = "hello, how can I help you?";
+        String welcome_info = "hello, how can I help you? What kind of information do you want to know?";
 //        TTS_speak("TTS is ready, Bus ID is : " + bus);
-//        TTS_speak(welcome_info);
+        TTS_speak(welcome_info);
     }
 
     private void TTS_speak(String speech) {
