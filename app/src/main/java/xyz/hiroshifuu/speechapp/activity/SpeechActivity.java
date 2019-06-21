@@ -220,11 +220,9 @@ public class SpeechActivity extends DemoMessagesActivity
                 String newText = response_strs[index].replace("\\n","\n");
                 super.messagesAdapter.addToStart(
                         MessagesFixtures.getTextMessage(newText, "1"), true);
-                if (index==0)
-                {
+                if(index==0){
                     TTS_speak(newText);
                 }
-                Log.d("TTS speak debug:", newText);
             }
 
         } else {
@@ -319,10 +317,10 @@ public class SpeechActivity extends DemoMessagesActivity
                 String newText = response_strs[index].replace("\\n","\n");
                 super.messagesAdapter.addToStart(
                         MessagesFixtures.getTextMessage(newText, "1"), true);
-                if (index==0)
-                {
+                if(index==0){
                     TTS_speak(newText);
                 }
+
             }
         } else {
             Log.d("adapter error:", "can not get response info!");
