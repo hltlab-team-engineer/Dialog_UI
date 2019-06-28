@@ -50,6 +50,7 @@ import xyz.hiroshifuu.speechapp.R;
 import xyz.hiroshifuu.speechapp.commons.ProperUtil;
 import xyz.hiroshifuu.speechapp.commons.MessagesFixtures;
 import xyz.hiroshifuu.speechapp.models.TextMessage;
+import xyz.hiroshifuu.speechapp.service.VoiceCommandService;
 import xyz.hiroshifuu.speechapp.utils.RetrofitClientInstance;
 
 public class SpeechActivity extends DemoMessagesActivity
@@ -106,6 +107,11 @@ public class SpeechActivity extends DemoMessagesActivity
         input.setInputListener(this);
         input.setTypingListener(this);
 
+        // add hot words function
+        Intent intent = new Intent(this, VoiceCommandService.class);
+        intent.setAction(Intent.ACTION_ASSIST);
+        startService(intent);
+
         input.attachmentButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (PermissionHandler.checkPermission(that, PermissionHandler.RECORD_AUDIO)) {
@@ -151,6 +157,7 @@ public class SpeechActivity extends DemoMessagesActivity
         checkPermission();
         that = this;
     }
+
 
     private boolean hasPermission() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {

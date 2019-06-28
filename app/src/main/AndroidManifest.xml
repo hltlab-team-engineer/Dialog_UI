@@ -8,8 +8,8 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!--Permission for GPS-->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/> <!--Permission for GPS-->
-    <uses-permission android:name="android.permission.BIND_VOICE_INTERACTION"
-        tools:ignore="ProtectedPermissions" />  <!-- Permission for hot words-->
+    <!--<uses-permission android:name="android.permission.BIND_VOICE_INTERACTION"-->
+        <!--tools:ignore="ProtectedPermissions" />  &lt;!&ndash; Permission for hot words&ndash;&gt;-->
 
 
     <!-- Needed only if your calling app reads numbers from the `PHONE_STATE`
@@ -33,6 +33,15 @@
                 <!--<action android:name="android.telecom.ConnectionService" />-->
             <!--</intent-filter>-->
         <!--</service>-->
+        <service android:name=".service.VoiceCommandService"
+            android:permission="android.permission.BIND_VOICE_INTERACTION">
+            <!--<meta-data android:name="android.voice_interaction"-->
+                <!--android:resource="@xml/assist_metadata" />-->
+            <intent-filter>
+                <action android:name="android.service.voice.VoiceInteractionService"/>
+            </intent-filter>
+        </service>
+
         <activity
             android:name=".activity.SpeechActivity"
             android:theme="@style/AppTheme.NoActionBar">
