@@ -43,6 +43,7 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.71828'
 //    compile project(':aars')
     implementation project(':aars')
+    implementation project(':models')
 }
 
 repositories {
