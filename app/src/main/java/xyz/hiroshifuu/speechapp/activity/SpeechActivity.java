@@ -55,7 +55,6 @@ import xyz.hiroshifuu.speechapp.R;
 import xyz.hiroshifuu.speechapp.commons.ProperUtil;
 import xyz.hiroshifuu.speechapp.commons.MessagesFixtures;
 import xyz.hiroshifuu.speechapp.models.TextMessage;
-import xyz.hiroshifuu.speechapp.service.VoiceCommandService;
 import xyz.hiroshifuu.speechapp.utils.RetrofitClientInstance;
 
 import edu.cmu.pocketsphinx.Assets;
@@ -63,6 +62,8 @@ import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
 import edu.cmu.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
+
+import static android.widget.Toast.makeText;
 
 public class SpeechActivity extends DemoMessagesActivity
         implements RecognitionListener, MessageInput.InputListener,
@@ -91,9 +92,11 @@ public class SpeechActivity extends DemoMessagesActivity
     private int[] grantResults;
 
     private static final String KWS_SEARCH = "wakeup";
-    private static final String KEYPHRASE = "Hello Bus";
-    private static final String KEYPHRASELOG = "Hot words keys: ";
+    private static final String KEYPHRASE = "Bus";
+    private static final String TAG = "Hot words keys: ";
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
+
+    private static final String MENU_SEARCH = "menu";
 
     private SpeechRecognizer recognizer;
     private HashMap<String, Integer> captions;
@@ -163,8 +166,8 @@ public class SpeechActivity extends DemoMessagesActivity
                 int curApiVersion = Build.VERSION.SDK_INT;
                 if (curApiVersion >= Build.VERSION_CODES.M) {
                     requestPermissions(
-                            new String[] { Manifest.permission.CALL_PHONE },
-                            0x11);
+                        new String[] { Manifest.permission.CALL_PHONE },
+                        0x11);
 //                        intentToCall("85443713");
                 } else {
                     intentToCall(phoneNumber);
@@ -195,7 +198,7 @@ public class SpeechActivity extends DemoMessagesActivity
             try {
                 Assets assets = new Assets(activityReference.get());
                 File assetDir = assets.syncAssets();
-                Log.d(KEYPHRASELOG, "assetDir: " + String.valueOf(assetDir));
+                Log.d(TAG, "assetDir: " + String.valueOf(assetDir));
                 activityReference.get().setupRecognizer(assetDir);
             } catch (IOException e) {
                 return e;
@@ -207,8 +210,9 @@ public class SpeechActivity extends DemoMessagesActivity
             if (result != null) {
 //                ((TextView) activityReference.get().findViewById(R.id.caption_text))
 //                        .setText("Failed to init recognizer " + result);
-                Log.d(KEYPHRASELOG, "post result "+ result);
+                Log.d(TAG, "post result "+ result);
             } else {
+                Log.d(TAG, "post result2 "+ result);
                 activityReference.get().switchSearch(KWS_SEARCH);
             }
         }
@@ -216,14 +220,14 @@ public class SpeechActivity extends DemoMessagesActivity
 
     private void switchSearch(String searchName) {
         recognizer.stop();
-
+        Log.d(TAG, "switch name: "+ searchName);
         // If we are not spotting, start listening with timeout (10000 ms or 10 seconds).
         if (searchName.equals(KWS_SEARCH))
             recognizer.startListening(searchName);
         else
             recognizer.startListening(searchName, 10000);
 
-        Log.d(KEYPHRASELOG, searchName);
+        Log.d(TAG, "switch name2: " + searchName);
     }
 
     private void setupRecognizer(File assetsDir) throws IOException {
@@ -241,12 +245,64 @@ public class SpeechActivity extends DemoMessagesActivity
 
         // Create keyword-activation search.
         recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
-        Log.d(KEYPHRASELOG, "setting up phase keys ");
+        Log.d(TAG, "setting up phase keys ");
         // Create grammar-based search for selection between demos
 //        File menuGrammar = new File(assetsDir, "menu.gram");
 //        recognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);
     }
 
+    @Override
+    public void onBeginningOfSpeech() {
+
+    }
+
+    /**
+     * In partial result we get quick updates about current hypothesis. In
+     * keyword spotting mode we can react here, in other modes we need to wait
+     * for final result in onResult.
+     */
+    @Override
+    public void onPartialResult(Hypothesis hypothesis) {
+        if (hypothesis == null)
+            return;
+        String text = hypothesis.getHypstr();
+        Log.d(TAG, "hypothesis: " + text);
+        if (text.equals(KEYPHRASE))
+            switchSearch(MENU_SEARCH);
+        else
+            switchSearch(KWS_SEARCH);
+    }
+
+    @Override
+    public void onEndOfSpeech() {
+        if (!recognizer.getSearchName().equals(KWS_SEARCH))
+            switchSearch(KWS_SEARCH);
+    }
+
+    @Override
+    public void onResult(Hypothesis hypothesis) {
+
+    }
+
+    @Override
+    public void onError(Exception e) {
+
+    }
+
+    @Override
+    public void onTimeout() {
+
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (recognizer != null) {
+            recognizer.cancel();
+            recognizer.shutdown();
+        }
+    }
 
     private boolean hasPermission() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
@@ -304,36 +360,6 @@ public class SpeechActivity extends DemoMessagesActivity
         return true;
     }
 
-    @Override
-    public void onBeginningOfSpeech() {
-
-    }
-
-    @Override
-    public void onEndOfSpeech() {
-
-    }
-
-    @Override
-    public void onPartialResult(Hypothesis hypothesis) {
-
-    }
-
-    @Override
-    public void onResult(Hypothesis hypothesis) {
-
-    }
-
-    @Override
-    public void onError(Exception e) {
-
-    }
-
-    @Override
-    public void onTimeout() {
-
-    }
-
     class ResponseMessage implements Callable<String> {
         private String response_str;
         private String input;
@@ -369,7 +395,7 @@ public class SpeechActivity extends DemoMessagesActivity
                 Log.d("res info00 : ", res);
                 sendSoundInfo2(res);
             } else {
-                Log.d(KEYPHRASELOG, "speech listener is null");
+                Log.d(TAG, "speech listener is null");
                 //status_tv.setText(getString(R.string.no_results_found));
             }
             mSpeechManager.destroy();
@@ -380,7 +406,7 @@ public class SpeechActivity extends DemoMessagesActivity
             }
         });
 
-        Log.d(KEYPHRASELOG, "after sound");
+        Log.d(TAG, "after sound");
 
         return res;
     }
@@ -545,15 +571,26 @@ public class SpeechActivity extends DemoMessagesActivity
     @Override
     //handle the request permission result
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case 10://same as integer above
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        locationManager.requestLocationUpdates("network", 1000, 0, locationListener);
-                        //configureButton();
-                    }
-                }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == PERMISSIONS_REQUEST_RECORD_AUDIO) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Recognizer initialization is a time-consuming and it involves IO,
+                // so we execute it in async task
+                new SetupTask(this).execute();
+            } else {
+                finish();
+            }
         }
+//        switch (requestCode) {
+//            case 10://same as integer above
+//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//                        locationManager.requestLocationUpdates("network", 1000, 0, locationListener);
+//                        //configureButton();
+//                    }
+//                }
+//        }
     }
 
 }

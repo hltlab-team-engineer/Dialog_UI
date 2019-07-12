@@ -35,14 +35,14 @@
                 <!--<action android:name="android.telecom.ConnectionService" />-->
             <!--</intent-filter>-->
         <!--</service>-->
-        <service android:name=".service.VoiceCommandService"
-            android:permission="android.permission.BIND_VOICE_INTERACTION">
-            <!--<meta-data android:name="android.voice_interaction"-->
-                <!--android:resource="@xml/assist_metadata" />-->
-            <intent-filter>
-                <action android:name="android.service.voice.VoiceInteractionService"/>
-            </intent-filter>
-        </service>
+        <!--<service android:name=".service.VoiceCommandService"-->
+            <!--android:permission="android.permission.BIND_VOICE_INTERACTION">-->
+            <!--&lt;!&ndash;<meta-data android:name="android.voice_interaction"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:resource="@xml/assist_metadata" />&ndash;&gt;-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.service.voice.VoiceInteractionService"/>-->
+            <!--</intent-filter>-->
+        <!--</service>-->
 
         <activity
             android:name=".activity.SpeechActivity"
