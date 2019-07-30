@@ -70,6 +70,10 @@ public class SpeechActivity extends DemoMessagesActivity
         MessageInput.TypingListener,
         TextToSpeech.OnInitListener {
 
+//    static {
+//        System.loadLibrary("native-lib");
+//    }
+
     private Properties my_property;
 
     private TextToSpeech tts;
