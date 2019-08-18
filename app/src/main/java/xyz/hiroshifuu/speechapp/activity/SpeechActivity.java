@@ -98,10 +98,10 @@ public class SpeechActivity extends DemoMessagesActivity
         this.messagesList = (MessagesList) this.findViewById(R.id.messagesList2);
         initAdapter();
 
-        String welcome_info = "hello, how can I help you? What kind of information do you want to know?";
+        String welcome_info = "Hello, how can I help you? What kind of information do you want to know?";
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(welcome_info, "1"), true);
-        welcome_info = "-Bus route \n -Bus rules";
+        welcome_info = "-Bus route \n-Bus rules";
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(welcome_info, "1"), true);
 
