@@ -37,6 +37,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import im.delight.android.location.SimpleLocation;
 import retrofit2.Call;
 import xyz.hiroshifuu.speechapp.commons.HttpUtil;
 import xyz.hiroshifuu.speechapp.commons.PermissionHandler;
@@ -78,6 +79,10 @@ public class SpeechActivity extends DemoMessagesActivity
     private int requestCode;
     private String[] permissions;
     private int[] grantResults;
+
+    private SimpleLocation location;
+    private double latitude = -999;
+    private double longitude = -999;
 
     @SuppressLint("WrongViewCast")
     @Override
@@ -131,7 +136,7 @@ public class SpeechActivity extends DemoMessagesActivity
             }
         });
 
-        callPhone  =  findViewById(R.id.call_phone);
+        callPhone = findViewById(R.id.call_phone);
 
         callPhone.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.M)
@@ -142,7 +147,7 @@ public class SpeechActivity extends DemoMessagesActivity
                     int curApiVersion = Build.VERSION.SDK_INT;
                     if (curApiVersion >= Build.VERSION_CODES.M) {
                         requestPermissions(
-                                new String[] { Manifest.permission.CALL_PHONE },
+                                new String[]{Manifest.permission.CALL_PHONE},
                                 0x11);
 //                        intentToCall("85443713");
                     } else {
@@ -155,6 +160,25 @@ public class SpeechActivity extends DemoMessagesActivity
         });
         checkPermission();
         that = this;
+
+        // construct a new instance of SimpleLocation
+        location = new SimpleLocation(this);
+
+        // if we can't access the location yet
+        if (!location.hasLocationEnabled()) {
+            // ask the user to enable location access
+            SimpleLocation.openSettings(this);
+        }
+
+        location.setListener(new SimpleLocation.Listener() {
+
+            public void onPositionChanged() {
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+                Log.d("location update", latitude + " " + longitude);
+            }
+
+        });
     }
 
     private boolean hasPermission() {
@@ -216,11 +240,11 @@ public class SpeechActivity extends DemoMessagesActivity
         }
         if (response_str != "") {
             String[] response_strs = response_str.split("::\\\\n");
-            for(int index = 0; index < response_strs.length; index++){
-                String newText = response_strs[index].replace("\\n","\n");
+            for (int index = 0; index < response_strs.length; index++) {
+                String newText = response_strs[index].replace("\\n", "\n");
                 super.messagesAdapter.addToStart(
                         MessagesFixtures.getTextMessage(newText, "1"), true);
-                if(index==0){
+                if (index == 0) {
                     TTS_speak(newText);
                 }
             }
@@ -247,7 +271,12 @@ public class SpeechActivity extends DemoMessagesActivity
             Call<TextMessage> textInfo = null;
             response_str = "";
             try {
-                textInfo = httpUtil.getTextMessage(bus, input);
+                if (latitude == -999 && longitude == -999)
+                    textInfo = httpUtil.getTextMessage(bus, input);
+                else {
+                    Log.d("location call", latitude + " " + longitude);
+                    textInfo = httpUtil.getTextMessageLoc(bus, latitude, longitude, input);
+                }
                 response_str = textInfo.execute().body().getResponse_str();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -282,12 +311,13 @@ public class SpeechActivity extends DemoMessagesActivity
         return res;
     }
 
-    private void sendSoundInfo2(String info){
+    private void sendSoundInfo2(String info) {
         Log.d("sound input", info);
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(info, "0"), true);
         sendSoundInfo(info);
     }
+
     private void sendSoundInfo(String info) {
 //        Log.d("sound input", info);
 //        super.messagesAdapter.addToStart(
@@ -313,11 +343,11 @@ public class SpeechActivity extends DemoMessagesActivity
         if (response_str != "") {
             Log.d("textMessage", response_str);
             String[] response_strs = response_str.split("::\\\\n");
-            for(int index=0; index < response_strs.length; index++){
-                String newText = response_strs[index].replace("\\n","\n");
+            for (int index = 0; index < response_strs.length; index++) {
+                String newText = response_strs[index].replace("\\n", "\n");
                 super.messagesAdapter.addToStart(
                         MessagesFixtures.getTextMessage(newText, "1"), true);
-                if(index==0){
+                if (index == 0) {
                     TTS_speak(newText);
                 }
 
@@ -360,7 +390,12 @@ public class SpeechActivity extends DemoMessagesActivity
             mSpeechManager.destroy();
             mSpeechManager = null;
         }
+
+        // stop location updates (saves battery)
+        location.endUpdates();
+
         super.onPause();
+
         if (tts != null) {
             tts.shutdown();
         }
@@ -370,6 +405,9 @@ public class SpeechActivity extends DemoMessagesActivity
     protected void onResume() {
         tts = new TextToSpeech(getApplicationContext(), this);
         super.onResume();
+
+        // make the device update its location
+        location.beginUpdates();
     }
 
 

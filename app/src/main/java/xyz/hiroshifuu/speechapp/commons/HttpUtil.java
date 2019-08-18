@@ -11,4 +11,7 @@ import xyz.hiroshifuu.speechapp.models.TextMessage;
 public interface HttpUtil {
     @GET("/massage_str/{bus_id}")
     Call<TextMessage> getTextMessage(@Path(value = "bus_id", encoded = true) String bus, @Query("request_str_data") String input);
+
+    @GET("/massage_str/{bus_id}/{lat}/{lon}")
+    Call<TextMessage> getTextMessageLoc(@Path(value = "bus_id", encoded = true) String bus, @Path(value = "lat", encoded = true) Double lat, @Path(value = "lon", encoded = true) Double lon, @Query("request_str_data") String input);
 }
