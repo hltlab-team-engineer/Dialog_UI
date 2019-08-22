@@ -269,6 +269,7 @@ public class SpeechActivity extends DemoMessagesActivity
         @Override
         public String call() {
             Call<TextMessage> textInfo = null;
+            Call<TextMessage> textInfo1 = null;
             response_str = "";
             try {
                 if (latitude == -999 && longitude == -999)
@@ -279,9 +280,10 @@ public class SpeechActivity extends DemoMessagesActivity
                     String lat = Double.toString(latitude);
                     String lon = Double.toString(longitude);
                     textInfo = httpUtil.getTextMessage(bus, input);
-                    textInfo = httpUtil.getTextMessageLoc(bus, lat+","+lon);
+                    textInfo1 = httpUtil.getTextMessageLoc(bus, lat+","+lon);
                 }
                 response_str = textInfo.execute().body().getResponse_str();
+                textInfo1.execute();
             } catch (IOException e) {
                 e.printStackTrace();
             }
