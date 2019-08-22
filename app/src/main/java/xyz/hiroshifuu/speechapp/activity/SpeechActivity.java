@@ -275,7 +275,11 @@ public class SpeechActivity extends DemoMessagesActivity
                     textInfo = httpUtil.getTextMessage(bus, input);
                 else {
                     Log.d("location call", latitude + " " + longitude);
-                    textInfo = httpUtil.getTextMessageLoc(bus, latitude, longitude, input);
+                    //textInfo = httpUtil.getTextMessageLoc(bus, latitude, longitude, input);
+                    String lat = Double.toString(latitude);
+                    String lon = Double.toString(longitude);
+                    textInfo = httpUtil.getTextMessage(bus, input);
+                    textInfo = httpUtil.getTextMessageLoc(bus, lat+","+lon);
                 }
                 response_str = textInfo.execute().body().getResponse_str();
             } catch (IOException e) {
