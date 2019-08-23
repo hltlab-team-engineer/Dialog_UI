@@ -44,13 +44,30 @@
 
     </RelativeLayout>
 
+    <TextView
+        android:id="@+id/scrollingtext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/chat_header_bar"
+        android:background="#D0D0D0"
+        android:ellipsize="marquee"
+
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:text="Welcome Boarding!"
+        android:textSize="30sp" />
+
 
     <xyz.hiroshifuu.speechapp.messages.MessagesList
         android:id="@+id/messagesList2"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="586dp"
         android:layout_above="@+id/input2"
-        android:layout_below="@+id/chat_header_bar"/>
+        android:layout_below="@+id/chat_header_bar"
+        android:layout_marginTop="40dp" />
 
     <View
         android:layout_width="match_parent"
