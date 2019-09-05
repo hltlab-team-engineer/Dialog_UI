@@ -52,6 +52,16 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!--<intent-filter>-->
+                <!--<action android:name="android.speech.action.RECOGNIZE_SPEECH" />-->
+
+                <!--<category android:name="android.intent.category.DEFAULT" />-->
+            <!--</intent-filter>-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.VOICE_COMMAND" />-->
+
+                <!--<category android:name="android.intent.category.DEFAULT" />-->
+            <!--</intent-filter>-->
         </activity>
         <!--<activity android:theme="@style/AppTheme.NoActionBar" android:name=".activity.SpeechActivity" >-->
 
@@ -60,6 +70,26 @@
             <!--android:name=".activity.MainActivity"-->
             <!--android:theme="@style/AppTheme.NoActionBar">-->
         <!--</activity>-->
+        <!-- TODO: why can't I specify more permissions here? -->
+        <!--<service-->
+            <!--android:name=".service.WebSocketRecognitionService"-->
+            <!--android:description="@string/summaryServiceWs"-->
+            <!--android:exported="true"-->
+            <!--android:icon="@drawable/ic_service"-->
+            <!--android:label="@string/labelRecognitionServiceWs"-->
+            <!--android:permission="android.permission.RECORD_AUDIO">-->
+            <!--<intent-filter>-->
+
+                <!--&lt;!&ndash; The constant value is defined at RecognitionService.SERVICE_INTERFACE. &ndash;&gt;-->
+                <!--<action android:name="android.speech.RecognitionService" />-->
+
+                <!--<category android:name="android.intent.category.DEFAULT" />-->
+            <!--</intent-filter>-->
+
+            <!--<meta-data-->
+                <!--android:name="android.speech"-->
+                <!--android:resource="@xml/recognition_service_ws" />-->
+        <!--</service>-->
     </application>
     <!--android:name=".activity.MainActivity"-->
 </manifest>

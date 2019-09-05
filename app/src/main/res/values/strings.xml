@@ -8,6 +8,30 @@
 
     <string name="start_typing_status">Start typing status</string>
     <string name="stop_typing_status">Stop typing status</string>
+    <string name="summaryServiceWs">Service based on the Kaldi GStreamer server. The server URL can be changed.</string>
+    <string name="labelRecognitionServiceWs">nus asr (fast recognition)</string>
+
+    <string name="keyImeAudioFormat" translatable="false">keyImeAudioFormat</string>
+    <string name="defaultAudioFormat" translatable="false">audio/x-raw</string>
+    <string name="keyImeAudioCues" translatable="false">keyImeAudioCues</string>
+
+    <string name="errorFailedGetServerUrl">ERROR: Failed to obtain the server URL</string>
+    <string name="keyWsServer" translatable="false">keyWsServer</string>
+    <string name="summaryWsServer" translatable="false">%1$s</string>
+
+    <string name="keyHttpServer" translatable="false">keyHttpServer</string>
+    <string name="defaultHttpServer" translatable="false">http://bark.phon.ioc.ee/speech-api/v1/recognize</string>
+    <string name="keyRespectLocale" translatable="false">keyRespectLocale</string>
+
+    <string name="titleWsServer">Server URL</string>
+
+
+    <string name="errorFailedLaunchIntent">ERROR: Intent is not serviced by any app</string>
+
+    <!-- Entries for the database, both apos and its escape character need escaping. -->
+    <string name="entryGrammarName1">[unrestricted input]</string>
+    <string name="entryGrammarDesc1">This grammar can be assigned to apps, where you always want to use unrestricted input regardless of the app\'\'s own settings</string>
+
     <string name="record_audio_is_required">We will only use the Record Audio Permission in order to use the Speech to Text Feature</string>
     <string name="start_listening">Start Listening</string>
     <string name="stop_listening">Stop Listening</string>

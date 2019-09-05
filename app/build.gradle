@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         applicationId "xyz.hiroshifuu.speechapp"
         minSdkVersion 21
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -28,11 +28,16 @@ android {
 //        }
 //    }
     buildToolsVersion '28.0.3'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7'
+    implementation 'com.googlecode.json-simple:json-simple:1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner'
@@ -52,7 +57,9 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.11.3'
     implementation 'io.github.ponnamkarthik:richlinkpreview:1.0.9'
     implementation 'com.squareup.picasso:picasso:2.71828'
-//    compile project(':aars')
+    implementation 'com.koushikdutta.async:androidasync:2.2.1'
+    implementation 'commons-io:commons-io:2.5'
+    //    compile project(':aars')
     implementation project(':aars')
     implementation project(':models')
 }
