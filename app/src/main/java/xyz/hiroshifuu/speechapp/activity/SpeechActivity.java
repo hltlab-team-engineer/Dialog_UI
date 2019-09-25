@@ -195,10 +195,10 @@ public class SpeechActivity extends DemoMessagesActivity
                                 0x11);
 //                        intentToCall("85443713");
                     } else {
-                        intentToCall("85443713");
+                        intentToCall(my_property.getProperty("emergenceCall"));
                     }
                 } else {
-                    intentToCall("85443713");
+                    intentToCall(my_property.getProperty("emergenceCall"));
                 }
             }
         });
@@ -264,15 +264,11 @@ public class SpeechActivity extends DemoMessagesActivity
      */
     private static MappedByteBuffer loadModelFile(AssetManager assets, String modelFilename)
             throws IOException {
-        Log.d(LOG_TAG, modelFilename + '1');
         AssetFileDescriptor fileDescriptor = assets.openFd(modelFilename);
-        Log.d(LOG_TAG, modelFilename + '2');
         FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
         FileChannel fileChannel = inputStream.getChannel();
-        Log.d(LOG_TAG, modelFilename + '3');
         long startOffset = fileDescriptor.getStartOffset();
         long declaredLength = fileDescriptor.getDeclaredLength();
-        Log.d(LOG_TAG, modelFilename + '4');
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
     }
 
@@ -427,10 +423,7 @@ public class SpeechActivity extends DemoMessagesActivity
             long currentTime = System.currentTimeMillis();
             final RecognizeCommands.RecognitionResult result =
                     recognizeCommands.processLatestResults(outputScores[0], currentTime);
-            Log.d(LOG_TAG, "check-result " + result.foundCommand);
-            String score = Math.round(result.score * 100) + "%";
-            Log.d(LOG_TAG, "check-result " + score);
-            if (!result.foundCommand.startsWith("_") && result.score > 0.60) {
+            if (!result.foundCommand.startsWith("_") && result.score > Float.valueOf(my_property.getProperty("wakeupAccuracy"))) {
                 runOnUiThread(
                     new Runnable() {
                         @Override
@@ -479,12 +472,6 @@ public class SpeechActivity extends DemoMessagesActivity
         ExecutorService executor = Executors.newCachedThreadPool();
         ResponseMessage response_Message = new ResponseMessage(input.toString(), bus);
         Future<String> result = executor.submit(response_Message);
-
-//        try {
-//            Thread.sleep(1000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
 
         String response_str = "";
         try {
@@ -582,9 +569,6 @@ public class SpeechActivity extends DemoMessagesActivity
     }
 
     private void sendSoundInfo(String info) {
-//        Log.d("sound input", info);
-//        super.messagesAdapter.addToStart(
-//                MessagesFixtures.getTextMessage(info, "0"), true);
         ExecutorService executor = Executors.newCachedThreadPool();
         ResponseMessage response_Message = new ResponseMessage(info, bus);
         Future<String> result = executor.submit(response_Message);
