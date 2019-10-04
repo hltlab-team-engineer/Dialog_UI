@@ -2,4 +2,7 @@
 
 <network-security-config>
     <base-config cleartextTrafficPermitted="true" />
+    <!--<domain-config cleartextTrafficPermitted="true">-->
+        <!--<domain includeSubdomains="true">52.230.9.229</domain>-->
+    <!--</domain-config>-->
 </network-security-config>

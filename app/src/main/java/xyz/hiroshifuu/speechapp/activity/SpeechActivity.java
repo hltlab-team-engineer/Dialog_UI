@@ -18,6 +18,7 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -57,6 +58,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
 import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import xyz.hiroshifuu.speechapp.commons.HttpUtil;
 import xyz.hiroshifuu.speechapp.commons.PermissionHandler;
 import xyz.hiroshifuu.speechapp.commons.RecognizeCommands;
@@ -81,7 +84,7 @@ public class SpeechActivity extends DemoMessagesActivity
     private Properties my_property;
 
     private TextToSpeech tts;
-    private String bus = "NO_BUS";
+    private static String bus = "NO_BUS";
     public String res;
     private TextView textView; //Show location in textview
     private LocationManager locationManager; //instance to access location services
@@ -92,7 +95,7 @@ public class SpeechActivity extends DemoMessagesActivity
     private MessageInput input;
     private Activity that;
 
-    private HttpUtil httpUtil;
+    private static HttpUtil httpUtil;
 
     private ImageButton callPhone;
     private int requestCode;
@@ -104,7 +107,7 @@ public class SpeechActivity extends DemoMessagesActivity
     private static final int RECORDING_LENGTH = (int) (SAMPLE_RATE * SAMPLE_DURATION_MS / 1000);
     private static final long AVERAGE_WINDOW_DURATION_MS = 1000;
     private static final float DETECTION_THRESHOLD = 0.50f;
-    private static final int SUPPRESSION_MS = 1500;
+    private static final int SUPPRESSION_MS = 500;
     private static final int MINIMUM_COUNT = 3;
     private static final long MINIMUM_TIME_BETWEEN_SAMPLES_MS = 30;
     private static final String LABEL_FILENAME = "file:///android_asset/conv_labels.txt";
@@ -467,8 +470,12 @@ public class SpeechActivity extends DemoMessagesActivity
     public boolean onSubmit(final CharSequence input, final String userID) throws IOException {
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(input.toString(), userID), true);
-
-
+//        Log.d(LOG_TAG, bus);
+//        String[] inputs = {bus, input.toString()};
+//        ResponseString responseString = new ResponseString();
+//        responseString.execute(inputs);
+        bus = "NO_BUS";
+        Log.d(LOG_TAG, bus);
         ExecutorService executor = Executors.newCachedThreadPool();
         ResponseMessage response_Message = new ResponseMessage(input.toString(), bus);
         Future<String> result = executor.submit(response_Message);
@@ -499,6 +506,60 @@ public class SpeechActivity extends DemoMessagesActivity
         return true;
     }
 
+    /**
+     * replace Callable by AsyncTask, make samaung can work
+     */
+//    private class ResponseString extends AsyncTask<String, Void, String> {
+//        @Override
+//        protected String doInBackground(String... params) {
+//            try {
+//                Log.d(LOG_TAG, params[0] + " " + params[1]);
+//                Call<TextMessage> textInfo = httpUtil.getTextMessage(params[0], params[1]);
+//                if(textInfo.equals(null)){
+//                    Log.d(LOG_TAG, "textInfo is null");
+//                }
+//                Response<TextMessage> execute = textInfo.execute();
+//                if(execute.equals(null)){
+//                    Log.d(LOG_TAG, "execute is null");
+//                }else{
+//                    Log.d(LOG_TAG, execute.toString());
+//                }
+//                TextMessage message = execute.body();
+//
+//                if(!message.equals(null)){
+//                    Log.d(LOG_TAG, message.getResponse_str());
+//                    return  message.getResponse_str();
+//                }else{
+//                    return null;
+//                }
+//
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(String response_str) {
+////            String response_str = result;
+//            if (response_str != "" || response_str.equals(null) ) {
+//                Log.d(LOG_TAG, response_str);
+//                String[] response_strs = response_str.split("::\\\\n");
+//                for (int index = 0; index < response_strs.length; index++) {
+//                    String newText = response_strs[index].replace("\\n", "\n");
+//                    messagesAdapter.addToStart(
+//                            MessagesFixtures.getTextMessage(newText, "1"), true);
+//                    if (index == 0) {
+//                        TTS_speak(newText);
+//                    }
+//                }
+//
+//            } else {
+//                Log.d("adapter error:", "can not get response info!");
+//            }
+//        }
+//    }
+
     class ResponseMessage implements Callable<String> {
         private String response_str;
         private String input;
@@ -514,9 +575,17 @@ public class SpeechActivity extends DemoMessagesActivity
             Call<TextMessage> textInfo = null;
             response_str = "";
             try {
-                textInfo = httpUtil.getTextMessage(bus, input);
+                Log.d(LOG_TAG, httpUtil.toString());
+                textInfo = httpUtil.getTextMessage(bus_id, input);
+                Log.d(LOG_TAG, textInfo.toString());
+//                textInfo.execute();
+//                TextMessage text = textInfo.execute().body();
+//                Log.d(LOG_TAG, text.toString());
                 response_str = textInfo.execute().body().getResponse_str();
-            } catch (IOException e) {
+                Log.d(LOG_TAG, response_str);
+                Log.d(LOG_TAG, "response_str");
+            }
+            catch (IOException e) {
                 e.printStackTrace();
             }
             return response_str;
@@ -569,6 +638,11 @@ public class SpeechActivity extends DemoMessagesActivity
     }
 
     private void sendSoundInfo(String info) {
+
+//        String[] inputs = {input.toString(), bus};
+//        ResponseString responseString = new ResponseString();
+//        responseString.execute(inputs);
+
         ExecutorService executor = Executors.newCachedThreadPool();
         ResponseMessage response_Message = new ResponseMessage(info, bus);
         Future<String> result = executor.submit(response_Message);
@@ -641,6 +715,13 @@ public class SpeechActivity extends DemoMessagesActivity
     protected void onResume() {
         tts = new TextToSpeech(getApplicationContext(), this);
         super.onResume();
+        if(httpUtil == null){
+            String base_url = my_property.getProperty("serverUrl");
+            String port = my_property.getProperty("port");
+            String path = base_url + ":" + port + "/";
+            Log.d("path", path);
+            httpUtil = RetrofitClientInstance.getRetrofitInstance(path).create(HttpUtil.class);
+        }
     }
 
 
