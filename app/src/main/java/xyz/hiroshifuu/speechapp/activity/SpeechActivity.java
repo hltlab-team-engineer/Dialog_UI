@@ -33,6 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.tensorflow.lite.Interpreter;
+import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -209,49 +210,49 @@ public class SpeechActivity extends DemoMessagesActivity
 
         // Load the labels for the model, but only display those that don't start
         // with an underscore.
-        String actualLabelFilename = LABEL_FILENAME.split("file:///android_asset/", -1)[1];
-        Log.i(LOG_TAG, "Reading labels from: " + actualLabelFilename);
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new InputStreamReader(getAssets().open(actualLabelFilename)));
-            String line;
-            while ((line = br.readLine()) != null) {
-                Log.d(LOG_TAG, line);
-                labels.add(line);
-                if (line.charAt(0) != '_') {
-                    displayedLabels.add(line.substring(0, 1).toUpperCase() + line.substring(1));
-                }
-            }
-            br.close();
-        } catch (IOException e) {
-            throw new RuntimeException("Problem reading label file!", e);
-        }
-
-        // Set up an object to smooth recognition results to increase accuracy.
-        recognizeCommands =
-                new RecognizeCommands(
-                        labels,
-                        AVERAGE_WINDOW_DURATION_MS,
-                        DETECTION_THRESHOLD,
-                        SUPPRESSION_MS,
-                        MINIMUM_COUNT,
-                        MINIMUM_TIME_BETWEEN_SAMPLES_MS);
-
-        String actualModelFilename = MODEL_FILENAME.split("file:///android_asset/", -1)[1];
-        Log.d(LOG_TAG, actualModelFilename);
-        try {
-            tfLite = new Interpreter(loadModelFile(this.getAssets(), actualModelFilename));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+//        String actualLabelFilename = LABEL_FILENAME.split("file:///android_asset/", -1)[1];
+//        Log.i(LOG_TAG, "Reading labels from: " + actualLabelFilename);
+//        BufferedReader br = null;
+//        try {
+//            br = new BufferedReader(new InputStreamReader(getAssets().open(actualLabelFilename)));
+//            String line;
+//            while ((line = br.readLine()) != null) {
+//                Log.d(LOG_TAG, line);
+//                labels.add(line);
+//                if (line.charAt(0) != '_') {
+//                    displayedLabels.add(line.substring(0, 1).toUpperCase() + line.substring(1));
+//                }
+//            }
+//            br.close();
+//        } catch (IOException e) {
+//            throw new RuntimeException("Problem reading label file!", e);
+//        }
 //
-        tfLite.resizeInput(0, new int[]{RECORDING_LENGTH, 1});
-        tfLite.resizeInput(1, new int[]{1});
-
-        // Start the recording and recognition threads.
-        requestMicrophonePermission();
-        startRecording();
-        startRecognition();
+//        // Set up an object to smooth recognition results to increase accuracy.
+//        recognizeCommands =
+//                new RecognizeCommands(
+//                        labels,
+//                        AVERAGE_WINDOW_DURATION_MS,
+//                        DETECTION_THRESHOLD,
+//                        SUPPRESSION_MS,
+//                        MINIMUM_COUNT,
+//                        MINIMUM_TIME_BETWEEN_SAMPLES_MS);
+//
+//        String actualModelFilename = MODEL_FILENAME.split("file:///android_asset/", -1)[1];
+//        Log.d(LOG_TAG, actualModelFilename);
+//        try {
+//            tfLite = new Interpreter(loadModelFile(this.getAssets(), actualModelFilename));
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+////
+//        tfLite.resizeInput(0, new int[]{RECORDING_LENGTH, 1});
+//        tfLite.resizeInput(1, new int[]{1});
+//
+//        // Start the recording and recognition threads.
+//        requestMicrophonePermission();
+//        startRecording();
+//        startRecognition();
         that = this;
     }
 
@@ -478,11 +479,15 @@ public class SpeechActivity extends DemoMessagesActivity
         Log.d(LOG_TAG, bus);
         ExecutorService executor = Executors.newCachedThreadPool();
         ResponseMessage response_Message = new ResponseMessage(input.toString(), bus);
-        Future<String> result = executor.submit(response_Message);
+        Future<TextMessage> result = executor.submit(response_Message);
 
+        TextMessage textMessage = null;
         String response_str = "";
+        String emergency_flag = "0";
         try {
-            response_str = result.get();
+            textMessage = result.get();
+            response_str = textMessage.getResponse_str();
+            emergency_flag = textMessage.getEmergency_flag();
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -502,7 +507,9 @@ public class SpeechActivity extends DemoMessagesActivity
         } else {
             Log.d("adapter error:", "can not get response info!");
         }
-
+        if(emergency_flag.equals("1")){
+            this.callPhone.performClick();
+        }
         return true;
     }
 
@@ -560,7 +567,7 @@ public class SpeechActivity extends DemoMessagesActivity
 //        }
 //    }
 
-    class ResponseMessage implements Callable<String> {
+    class ResponseMessage implements Callable<TextMessage> {
         private String response_str;
         private String input;
         private String bus_id;
@@ -571,30 +578,31 @@ public class SpeechActivity extends DemoMessagesActivity
         }
 
         @Override
-        public String call() {
+        public TextMessage call() {
             Call<TextMessage> textInfo = null;
-            response_str = "";
+//            response_str = "";
+            TextMessage textMessage = null;
             try {
-                Log.d(LOG_TAG, httpUtil.toString());
                 textInfo = httpUtil.getTextMessage(bus_id, input);
-                Log.d(LOG_TAG, textInfo.toString());
-//                textInfo.execute();
+
 //                TextMessage text = textInfo.execute().body();
 //                Log.d(LOG_TAG, text.toString());
-                response_str = textInfo.execute().body().getResponse_str();
+                textMessage = textInfo.execute().body();
+                response_str = textMessage.getResponse_str();
                 Log.d(LOG_TAG, response_str);
-                Log.d(LOG_TAG, "response_str");
+
             }
             catch (IOException e) {
                 e.printStackTrace();
             }
-            return response_str;
+            return textMessage;
         }
     }
 
     private String SetSpeechListener() {
-        stopRecording();
-        stopRecognition();
+        // stop wakeup record
+//        stopRecording();
+//        stopRecognition();
         res = "";
         Log.d("start speech", "start speech");
         mSpeechManager = new SpeechRecognizerManager(this, new SpeechRecognizerManager.onResultsReady() {
@@ -615,14 +623,15 @@ public class SpeechActivity extends DemoMessagesActivity
             }
 
         });
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                startRecording();
-                startRecognition();
-            }
-        },10000);
+        // start wakeup record
+//        Timer timer = new Timer();
+//        timer.schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                startRecording();
+//                startRecognition();
+//            }
+//        },10000);
 
 
         Log.d("after sound", "after sound");
@@ -642,14 +651,18 @@ public class SpeechActivity extends DemoMessagesActivity
 //        String[] inputs = {input.toString(), bus};
 //        ResponseString responseString = new ResponseString();
 //        responseString.execute(inputs);
-
+        bus = "NO_BUS";
         ExecutorService executor = Executors.newCachedThreadPool();
         ResponseMessage response_Message = new ResponseMessage(info, bus);
-        Future<String> result = executor.submit(response_Message);
+        Future<TextMessage> result = executor.submit(response_Message);
 
+        TextMessage textMessage = null;
         String response_str = "";
+        String emergency_flag = "0";
         try {
-            response_str = result.get();
+            textMessage = result.get();
+            response_str = textMessage.getResponse_str();
+            emergency_flag = textMessage.getEmergency_flag();
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -670,7 +683,9 @@ public class SpeechActivity extends DemoMessagesActivity
         } else {
             Log.d("adapter error:", "can not get response info!");
         }
-
+        if(emergency_flag.equals("1")){
+            this.callPhone.performClick();
+        }
     }
 
     private void initAdapter() {
