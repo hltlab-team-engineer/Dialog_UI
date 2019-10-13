@@ -9,6 +9,7 @@ import android.speech.SpeechRecognizer;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 import javax.security.auth.callback.Callback;
@@ -61,19 +62,23 @@ public class VoiceCommandService extends VoiceInteractionService {
     public void onReady() {
         super.onReady();
         Log.i(TAG, "Creating " + this);
+        Log.i(TAG, "Creating " + this);
+//        Log.i(TAG, "Keyphrase enrollment error? " + getKeyphraseEnrollmentInfo().getParseError());
+//        Log.i(TAG, "Keyphrase enrollment meta-data: "
+//                + Arrays.toString(getKeyphraseEnrollmentInfo().listKeyphraseMetadata()));
         mHotwordDetector = createAlwaysOnHotwordDetector(
-                "Hello", Locale.forLanguageTag("en-US"), (AlwaysOnHotwordDetector.Callback) mHotwordCallback);
+                "Hello Bus", Locale.forLanguageTag("en-US"), (AlwaysOnHotwordDetector.Callback) mHotwordCallback);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Bundle args = new Bundle();
-        args.putParcelable("intent", new Intent(this, SpeechActivity.class));
-        showSession(args, 0);
-        stopSelf(startId);
-        return START_NOT_STICKY;
-    }
+//    @RequiresApi(api = Build.VERSION_CODES.M)
+//    @Override
+//    public int onStartCommand(Intent intent, int flags, int startId) {
+//        Bundle args = new Bundle();
+//        args.putParcelable("intent", new Intent(this, SpeechActivity.class));
+//        showSession(args, 0);
+//        stopSelf(startId);
+//        return START_NOT_STICKY;
+//    }
 
     private void hotwordAvailabilityChangeHelper(int availability) {
         Log.i(TAG, "Hotword availability = " + availability);
