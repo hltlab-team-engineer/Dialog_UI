@@ -151,11 +151,23 @@ public class SpeechActivity extends DemoMessagesActivity
         this.messagesList = (MessagesList) this.findViewById(R.id.messagesList2);
         initAdapter();
 
-        String welcome_info = "hello, how can I help you? What kind of information do you want to know?";
+        String welcome_info = "hello, I am your autonomus bus agent. How can I help you? What kind of information do you want to know?";
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(welcome_info, "1"), true);
 
                 TTS_speak(welcome_info);
+
+        String welcome_info1 = "To ask location: How can I go to changi airport? ";
+        super.messagesAdapter.addToStart(
+                MessagesFixtures.getTextMessage(welcome_info1, "1"), true);
+
+        String welcome_info2 = "To ask help in emergency: Please help there is emergency..";
+        super.messagesAdapter.addToStart(
+                MessagesFixtures.getTextMessage(welcome_info2, "1"), true);
+
+        String welcome_info3 = "To ask general questions: What is LTA Singapore?";
+        super.messagesAdapter.addToStart(
+                MessagesFixtures.getTextMessage(welcome_info3, "1"), true);
 
         input = (MessageInput) this.findViewById(R.id.input2);
         input.setInputListener(this);
@@ -505,6 +517,20 @@ public class SpeechActivity extends DemoMessagesActivity
             Log.d("adapter error:", "can not get response info!");
         }
         if(emergency_flag.equals("1")){
+            if (response_str != "") {
+                String[] response_strs = response_str.split("::\\\\n");
+                for (int index = 0; index < response_strs.length; index++) {
+                    String newText = response_strs[index].replace("\\n", "\n");
+                    super.messagesAdapter.addToStart(
+                            MessagesFixtures.getTextMessage(newText, "1"), true);
+                    if (index == 0) {
+                        TTS_speak(newText);
+                    }
+                }
+
+            } else {
+                Log.d("adapter error:", "can not get response info!");
+            }
             this.callPhone.performClick();
         }
         return true;
