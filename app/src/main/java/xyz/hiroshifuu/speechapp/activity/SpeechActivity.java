@@ -100,13 +100,13 @@ public class SpeechActivity extends DemoMessagesActivity
 
     private MqttConnectOptions initMqttConnectionOptions() {
         MqttConnectOptions mOptions = new MqttConnectOptions();
-        mOptions.setAutomaticReconnect(false);//断开后，是否自动连接
-        mOptions.setCleanSession(true);//是否清空客户端的连接记录。若为true，则断开后，broker将自动清除该客户端连接信息
+        mOptions.setAutomaticReconnect(true);//断开后，是否自动连接
+        mOptions.setCleanSession(false);//是否清空客户端的连接记录。若为true，则断开后，broker将自动清除该客户端连接信息
         mOptions.setConnectionTimeout(60);//设置超时时间，单位为秒
 //        mOptions.setUserName("Admin");//设置用户名。跟Client ID不同。用户名可以看做权限等级
 //        mOptions.setPassword("Admin");//设置登录密码
-        mOptions.setKeepAliveInterval(60);//心跳时间，单位为秒。即多长时间确认一次Client端是否在线
-        mOptions.setMaxInflight(1);//允许同时发送几条消息（未收到broker确认信息）
+        mOptions.setKeepAliveInterval(6);//心跳时间，单位为秒。即多长时间确认一次Client端是否在线
+        mOptions.setMaxInflight(3);//允许同时发送几条消息（未收到broker确认信息）
         mOptions.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);//选择MQTT版本
         return mOptions;
     }
@@ -114,7 +114,7 @@ public class SpeechActivity extends DemoMessagesActivity
     private MqttCallbackExtended mqttCallback = new MqttCallbackExtended() {
         @Override
         public void connectComplete(boolean reconnect, String serverURI) {
-            Log.i("MQTT", "connect Complete" + Thread.currentThread().getId());
+            Log.i("MQTT", "connect Complete " + Thread.currentThread().getId());
         }
 
         @Override
