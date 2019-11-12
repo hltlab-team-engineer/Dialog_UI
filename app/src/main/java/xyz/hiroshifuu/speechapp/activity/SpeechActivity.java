@@ -111,7 +111,6 @@ public class SpeechActivity extends DemoMessagesActivity
     private SimpleLocation location;
     private double latitude = -999;
     private double longitude = -999;
-    public String res;
 
     private MqttClient initClient(String serverURI, String clientId, MqttCallback callback, MqttConnectOptions options, String[] subscribeTopics) {
         MqttClient client = null;
@@ -938,12 +937,12 @@ public class SpeechActivity extends DemoMessagesActivity
         }
     }
 
-    class ResponseMessage implements Callable<String> {
+    class ResponseMessage_zhantong implements Callable<String> {
         private String response_str;
         private String input;
         private String bus_id;
 
-        ResponseMessage(String input, String bus_id) {
+        ResponseMessage_zhantong(String input, String bus_id) {
             this.input = input;
             this.bus_id = bus_id;
         }
