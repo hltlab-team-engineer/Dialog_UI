@@ -30,6 +30,8 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -101,6 +103,8 @@ public class SpeechActivity extends DemoMessagesActivity
     private SpeechRecognizerManager mSpeechManager;
     private MessageInput input;
     private Activity that;
+    Timer timer;
+    MyTimerTask myTimerTask;
 
     private static HttpUtil httpUtil;
 
@@ -111,7 +115,7 @@ public class SpeechActivity extends DemoMessagesActivity
     private SimpleLocation location;
     private double latitude = -999;
     private double longitude = -999;
-    public String res;
+//    public String res;
 
     private MqttClient initClient(String serverURI, String clientId, MqttCallback callback, MqttConnectOptions options, String[] subscribeTopics) {
         MqttClient client = null;
@@ -236,6 +240,10 @@ public class SpeechActivity extends DemoMessagesActivity
         input = (MessageInput) this.findViewById(R.id.input2);
         input.setInputListener(this);
         input.setTypingListener(this);
+        myTimerTask = new MyTimerTask();
+        //delay 1000ms, repeat in 5000ms
+        timer.schedule(myTimerTask, 5000, 5000);
+
 
         input.attachmentButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -938,12 +946,12 @@ public class SpeechActivity extends DemoMessagesActivity
         }
     }
 
-    class ResponseMessage implements Callable<String> {
+    class ResponseMessage_zhantong implements Callable<String> {
         private String response_str;
         private String input;
         private String bus_id;
 
-        ResponseMessage(String input, String bus_id) {
+        ResponseMessage_zhantong(String input, String bus_id) {
             this.input = input;
             this.bus_id = bus_id;
         }
@@ -973,5 +981,17 @@ public class SpeechActivity extends DemoMessagesActivity
         }
     }
 
+
+    class MyTimerTask extends TimerTask {
+        ExecutorService executor = Executors.newCachedThreadPool();
+
+        @Override
+        public void run() {
+
+            ResponseMessage_zhantong response_Message = new ResponseMessage_zhantong("Kent Ridge", bus);
+            Future<String> result = executor.submit(response_Message);
+        }
+
+    }
 }
 
