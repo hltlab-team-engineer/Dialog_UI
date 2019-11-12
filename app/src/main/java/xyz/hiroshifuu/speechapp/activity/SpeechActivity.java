@@ -115,7 +115,6 @@ public class SpeechActivity extends DemoMessagesActivity
     private SimpleLocation location;
     private double latitude = -999;
     private double longitude = -999;
-//    public String res;
 
     private MqttClient initClient(String serverURI, String clientId, MqttCallback callback, MqttConnectOptions options, String[] subscribeTopics) {
         MqttClient client = null;
