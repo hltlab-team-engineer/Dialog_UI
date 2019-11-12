@@ -219,49 +219,49 @@ public class SpeechActivity extends DemoMessagesActivity
 
         // Load the labels for the model, but only display those that don't start
         // with an underscore.
-//        String actualLabelFilename = LABEL_FILENAME.split("file:///android_asset/", -1)[1];
-//        Log.i(LOG_TAG, "Reading labels from: " + actualLabelFilename);
-//        BufferedReader br = null;
-//        try {
-//            br = new BufferedReader(new InputStreamReader(getAssets().open(actualLabelFilename)));
-//            String line;
-//            while ((line = br.readLine()) != null) {
-//                Log.d(LOG_TAG, line);
-//                labels.add(line);
-//                if (line.charAt(0) != '_') {
-//                    displayedLabels.add(line.substring(0, 1).toUpperCase() + line.substring(1));
-//                }
-//            }
-//            br.close();
-//        } catch (IOException e) {
-//            throw new RuntimeException("Problem reading label file!", e);
-//        }
-//
-//        // Set up an object to smooth recognition results to increase accuracy.
-//        recognizeCommands =
-//                new RecognizeCommands(
-//                        labels,
-//                        AVERAGE_WINDOW_DURATION_MS,
-//                        DETECTION_THRESHOLD,
-//                        SUPPRESSION_MS,
-//                        MINIMUM_COUNT,
-//                        MINIMUM_TIME_BETWEEN_SAMPLES_MS);
-//
-//        String actualModelFilename = MODEL_FILENAME.split("file:///android_asset/", -1)[1];
-//        Log.d(LOG_TAG, actualModelFilename);
-//        try {
-//            tfLite = new Interpreter(loadModelFile(this.getAssets(), actualModelFilename));
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-////
-//        tfLite.resizeInput(0, new int[]{RECORDING_LENGTH, 1});
-//        tfLite.resizeInput(1, new int[]{1});
-//
-//        // Start the recording and recognition threads.
-//        requestMicrophonePermission();
-//        startRecording();
-//        startRecognition();
+        String actualLabelFilename = LABEL_FILENAME.split("file:///android_asset/", -1)[1];
+        Log.i(LOG_TAG, "Reading labels from: " + actualLabelFilename);
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new InputStreamReader(getAssets().open(actualLabelFilename)));
+            String line;
+            while ((line = br.readLine()) != null) {
+                Log.d(LOG_TAG, line);
+                labels.add(line);
+                if (line.charAt(0) != '_') {
+                    displayedLabels.add(line.substring(0, 1).toUpperCase() + line.substring(1));
+                }
+            }
+            br.close();
+        } catch (IOException e) {
+            throw new RuntimeException("Problem reading label file!", e);
+        }
+
+        // Set up an object to smooth recognition results to increase accuracy.
+        recognizeCommands =
+                new RecognizeCommands(
+                        labels,
+                        AVERAGE_WINDOW_DURATION_MS,
+                        DETECTION_THRESHOLD,
+                        SUPPRESSION_MS,
+                        MINIMUM_COUNT,
+                        MINIMUM_TIME_BETWEEN_SAMPLES_MS);
+
+        String actualModelFilename = MODEL_FILENAME.split("file:///android_asset/", -1)[1];
+        Log.d(LOG_TAG, actualModelFilename);
+        try {
+            tfLite = new Interpreter(loadModelFile(this.getAssets(), actualModelFilename));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        tfLite.resizeInput(0, new int[]{RECORDING_LENGTH, 1});
+        tfLite.resizeInput(1, new int[]{1});
+
+        // Start the recording and recognition threads.
+        requestMicrophonePermission();
+        startRecording();
+        startRecognition();
         that = this;
     }
 
@@ -624,8 +624,8 @@ public class SpeechActivity extends DemoMessagesActivity
 
     private String SetSpeechListener() {
         // stop wakeup record
-//        stopRecording();
-//        stopRecognition();
+        stopRecording();
+        stopRecognition();
         res = "";
         Log.d("start speech", "start speech");
         mSpeechManager = new SpeechRecognizerManager(this, new SpeechRecognizerManager.onResultsReady() {
@@ -647,14 +647,14 @@ public class SpeechActivity extends DemoMessagesActivity
 
         });
         // start wakeup record
-//        Timer timer = new Timer();
-//        timer.schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                startRecording();
-//                startRecognition();
-//            }
-//        },10000);
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                startRecording();
+                startRecognition();
+            }
+        },10000);
 
 
         Log.d("after sound", "after sound");
@@ -781,16 +781,16 @@ public class SpeechActivity extends DemoMessagesActivity
     }
 
     private void TTS_speak(String speech) {
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
-        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        int amStreamMusicMaxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol, 0);
-
-        Bundle bundle = new Bundle();
-        bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
-        bundle.putInt(TextToSpeech.Engine.KEY_PARAM_VOLUME, amStreamMusicMaxVol);
-
-        tts.speak(speech, TextToSpeech.QUEUE_FLUSH, null, null);
+//        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+//        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+//        int amStreamMusicMaxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+//        am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol, 0);
+//
+//        Bundle bundle = new Bundle();
+//        bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
+//        bundle.putInt(TextToSpeech.Engine.KEY_PARAM_VOLUME, amStreamMusicMaxVol);
+//
+//        tts.speak(speech, TextToSpeech.QUEUE_FLUSH, null, null);
     }
 
     private void checkPermission() {
