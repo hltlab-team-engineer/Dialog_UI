@@ -68,6 +68,9 @@ dependencies {
     //    compile project(':aars')
     implementation project(':aars')
     implementation project(':models')
+
+    implementation 'com.github.delight-im:Android-SimpleLocation:v1.0.1'
+    implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.2'
 }
 
 repositories {

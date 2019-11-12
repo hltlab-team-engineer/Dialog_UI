@@ -3,7 +3,6 @@ package xyz.hiroshifuu.speechapp.activity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
@@ -32,6 +31,15 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+
 import org.tensorflow.lite.Interpreter;
 import org.w3c.dom.Text;
 
@@ -58,22 +66,22 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
+import im.delight.android.location.SimpleLocation;
 import retrofit2.Call;
+import xyz.hiroshifuu.speechapp.R;
+import xyz.hiroshifuu.speechapp.commons.AppUtils;
 import retrofit2.Callback;
 import retrofit2.Response;
 import xyz.hiroshifuu.speechapp.commons.HttpUtil;
+import xyz.hiroshifuu.speechapp.commons.Message;
+import xyz.hiroshifuu.speechapp.commons.MessagesFixtures;
 import xyz.hiroshifuu.speechapp.commons.PermissionHandler;
 import xyz.hiroshifuu.speechapp.commons.RecognizeCommands;
+import xyz.hiroshifuu.speechapp.commons.ProperUtil;
 import xyz.hiroshifuu.speechapp.commons.SpeechRecognizerManager;
 import xyz.hiroshifuu.speechapp.messages.MessageInput;
 import xyz.hiroshifuu.speechapp.messages.MessagesList;
 import xyz.hiroshifuu.speechapp.messages.MessagesListAdapter;
-
-import xyz.hiroshifuu.speechapp.commons.AppUtils;
-import xyz.hiroshifuu.speechapp.commons.Message;
-import xyz.hiroshifuu.speechapp.R;
-import xyz.hiroshifuu.speechapp.commons.ProperUtil;
-import xyz.hiroshifuu.speechapp.commons.MessagesFixtures;
 import xyz.hiroshifuu.speechapp.models.TextMessage;
 import xyz.hiroshifuu.speechapp.utils.RetrofitClientInstance;
 
@@ -83,14 +91,12 @@ public class SpeechActivity extends DemoMessagesActivity
         TextToSpeech.OnInitListener {
 
     private Properties my_property;
-
     private TextToSpeech tts;
     private static String bus = "NO_BUS";
     public String res;
     private TextView textView; //Show location in textview
     private LocationManager locationManager; //instance to access location services
     private LocationListener locationListener;//listen for location changes
-
     private MessagesList messagesList;
     private SpeechRecognizerManager mSpeechManager;
     private MessageInput input;
@@ -102,6 +108,64 @@ public class SpeechActivity extends DemoMessagesActivity
     private int requestCode;
     private String[] permissions;
     private int[] grantResults;
+    private SimpleLocation location;
+    private double latitude = -999;
+    private double longitude = -999;
+    public String res;
+
+    private MqttClient initClient(String serverURI, String clientId, MqttCallback callback, MqttConnectOptions options, String[] subscribeTopics) {
+        MqttClient client = null;
+        try {
+            MemoryPersistence persistence = new MemoryPersistence();
+            client = new MqttClient(serverURI, clientId, persistence);
+            client.setCallback(callback);//设置回调函数
+            client.connect(options);//连接broker
+            client.subscribe(subscribeTopics);//设置监听的topic
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+        return client;
+    }
+
+    private MqttConnectOptions initMqttConnectionOptions() {
+        MqttConnectOptions mOptions = new MqttConnectOptions();
+        mOptions.setAutomaticReconnect(true);//断开后，是否自动连接
+        mOptions.setCleanSession(false);//是否清空客户端的连接记录。若为true，则断开后，broker将自动清除该客户端连接信息
+        mOptions.setConnectionTimeout(60);//设置超时时间，单位为秒
+//        mOptions.setUserName("Admin");//设置用户名。跟Client ID不同。用户名可以看做权限等级
+//        mOptions.setPassword("Admin");//设置登录密码
+        mOptions.setKeepAliveInterval(6);//心跳时间，单位为秒。即多长时间确认一次Client端是否在线
+        mOptions.setMaxInflight(3);//允许同时发送几条消息（未收到broker确认信息）
+        mOptions.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);//选择MQTT版本
+        return mOptions;
+    }
+
+    private MqttCallbackExtended mqttCallback = new MqttCallbackExtended() {
+        @Override
+        public void connectComplete(boolean reconnect, String serverURI) {
+            Log.i("MQTT", "connect Complete " + Thread.currentThread().getId());
+        }
+
+        @Override
+        public void connectionLost(Throwable cause) {
+            Log.i("MQTT", "connection Lost ");
+        }
+
+        @Override
+        public void messageArrived(String topic, MqttMessage message) throws Exception {
+            Log.i("MQTT", "topic: " + topic + " ; messageArrived: " + new String(message.getPayload()));
+            if (topic.equalsIgnoreCase("bus_1")) {
+                TextView tv = findViewById(R.id.scrollingtext);
+                tv.setText(new String(message.getPayload()));
+                tv.setSelected(true);
+            }
+        }
+
+        @Override
+        public void deliveryComplete(IMqttDeliveryToken token) {
+            Log.i("MQTT", "delivery Complete ");//即服务器成功delivery消息
+        }
+    };
 
     private static final int SAMPLE_RATE = 16000;
     private static final int SAMPLE_DURATION_MS = 1400;
@@ -263,11 +327,35 @@ public class SpeechActivity extends DemoMessagesActivity
         startRecording();
         startRecognition();
         that = this;
+
+        // construct a new instance of SimpleLocation
+        location = new SimpleLocation(this);
+
+        // if we can't access the location yet
+        if (!location.hasLocationEnabled()) {
+            // ask the user to enable location access
+            SimpleLocation.openSettings(this);
+        }
+
+        location.setListener(new SimpleLocation.Listener() {
+
+            public void onPositionChanged() {
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+                Log.d("location update", latitude + " " + longitude);
+            }
+
+        });
+
+        findViewById(R.id.scrollingtext).setSelected(true);
+
+        MqttClient mClient = initClient("tcp://test.mosquitto.org:1883", "Client_zhant", mqttCallback, initMqttConnectionOptions(), new String[]{"bus_1"});
     }
 
     private boolean hasPermission() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
             return false;
+
         }
         return true;
     }
@@ -743,7 +831,12 @@ public class SpeechActivity extends DemoMessagesActivity
             mSpeechManager.destroy();
             mSpeechManager = null;
         }
+
+        // stop location updates (saves battery)
+        location.endUpdates();
+
         super.onPause();
+
         if (tts != null) {
             tts.shutdown();
         }
@@ -760,8 +853,10 @@ public class SpeechActivity extends DemoMessagesActivity
             Log.d("path", path);
             httpUtil = RetrofitClientInstance.getRetrofitInstance(path).create(HttpUtil.class);
         }
-    }
 
+        // make the device update its location
+        location.beginUpdates();
+    }
 
     @Override
     public void onInit(int status) {
@@ -840,6 +935,41 @@ public class SpeechActivity extends DemoMessagesActivity
                         //configureButton();
                     }
                 }
+        }
+    }
+
+    class ResponseMessage implements Callable<String> {
+        private String response_str;
+        private String input;
+        private String bus_id;
+
+        ResponseMessage(String input, String bus_id) {
+            this.input = input;
+            this.bus_id = bus_id;
+        }
+
+        @Override
+        public String call() {
+            Call<TextMessage> textInfo = null;
+            Call<TextMessage> textInfo1 = null;
+            response_str = "";
+            try {
+                if (latitude == -999 && longitude == -999)
+                    textInfo = httpUtil.getTextMessage(bus, input);
+                else {
+                    Log.d("location call", latitude + " " + longitude);
+                    //textInfo = httpUtil.getTextMessageLoc(bus, latitude, longitude, input);
+                    String lat = Double.toString(latitude);
+                    String lon = Double.toString(longitude);
+                    textInfo = httpUtil.getTextMessage(bus, input);
+                    textInfo1 = httpUtil.getTextMessageLoc(bus, lat + "," + lon);
+                }
+                response_str = textInfo.execute().body().getResponse_str();
+                textInfo1.execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return response_str;
         }
     }
 
