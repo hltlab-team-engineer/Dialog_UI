@@ -61,6 +61,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import xyz.hiroshifuu.speechapp.commons.FloatTextView;
 import xyz.hiroshifuu.speechapp.commons.HttpUtil;
 import xyz.hiroshifuu.speechapp.commons.PermissionHandler;
 import xyz.hiroshifuu.speechapp.commons.RecognizeCommands;
@@ -132,6 +133,8 @@ public class SpeechActivity extends DemoMessagesActivity
     private List<String> displayedLabels = new ArrayList<>();
     private RecognizeCommands recognizeCommands = null;
 
+    private FloatTextView tv_scoll;
+
     @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -172,6 +175,12 @@ public class SpeechActivity extends DemoMessagesActivity
         input = (MessageInput) this.findViewById(R.id.input2);
         input.setInputListener(this);
         input.setTypingListener(this);
+
+        tv_scoll = (FloatTextView) findViewById(R.id.tv_menuname);
+
+        tv_scoll.initScrollTextView(getWindowManager(), "next station", 1);
+//        tv_scoll.setText("welcome to bus!");
+        tv_scoll.starScroll();
 
         input.attachmentButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -480,6 +489,10 @@ public class SpeechActivity extends DemoMessagesActivity
     public boolean onSubmit(final CharSequence input, final String userID) throws IOException {
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(input.toString(), userID), true);
+//        tv_scoll.setText("welcome to bus!");
+        tv_scoll.initScrollTextView(getWindowManager(), "welcome to bus!", 4);
+        tv_scoll.stopScroll();
+        tv_scoll.starScroll();
 //        Log.d(LOG_TAG, bus);
 //        String[] inputs = {bus, input.toString()};
 //        ResponseString responseString = new ResponseString();
@@ -781,16 +794,16 @@ public class SpeechActivity extends DemoMessagesActivity
     }
 
     private void TTS_speak(String speech) {
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
-        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        int amStreamMusicMaxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol, 0);
-
-        Bundle bundle = new Bundle();
-        bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
-        bundle.putInt(TextToSpeech.Engine.KEY_PARAM_VOLUME, amStreamMusicMaxVol);
-
-        tts.speak(speech, TextToSpeech.QUEUE_FLUSH, null, null);
+//        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+//        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+//        int amStreamMusicMaxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+//        am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol, 0);
+//
+//        Bundle bundle = new Bundle();
+//        bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
+//        bundle.putInt(TextToSpeech.Engine.KEY_PARAM_VOLUME, amStreamMusicMaxVol);
+//
+//        tts.speak(speech, TextToSpeech.QUEUE_FLUSH, null, null);
     }
 
     private void checkPermission() {
