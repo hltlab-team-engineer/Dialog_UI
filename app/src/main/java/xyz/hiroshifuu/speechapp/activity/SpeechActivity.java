@@ -21,6 +21,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
@@ -58,6 +59,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
+import im.delight.android.location.SimpleLocation;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -133,7 +135,46 @@ public class SpeechActivity extends DemoMessagesActivity
     private List<String> displayedLabels = new ArrayList<>();
     private RecognizeCommands recognizeCommands = null;
 
+    private final Timer scrollTimer = new Timer();
+//    private TimerTask scrollTask;
     private FloatTextView tv_scoll;
+    private String scrollText = "welcome to bus!";
+
+    private SimpleLocation location;
+    private double latitude = -999;
+    private double longitude = -999;
+
+    private Handler scrollHandler = new Handler() {
+        @Override
+        public void handleMessage(android.os.Message msg) {
+            // TODO Auto-generated method stub
+            super.handleMessage(msg);
+            //        tv_scoll.setText("welcome to bus!");
+            ExecutorService scrollExecutor = Executors.newCachedThreadPool();
+            ResponseLocationMessage response_Message = new ResponseLocationMessage("input", bus);
+            Future<String> result = scrollExecutor.submit(response_Message);
+
+            String textMessage = null;
+
+            try {
+                textMessage = result.get();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (textMessage != "") {
+                scrollText = textMessage;
+
+            } else {
+                Log.d("adapter error:", "can not get location info!");
+            }
+
+            tv_scoll.initScrollTextView(getWindowManager(), scrollText, 4);
+            tv_scoll.stopScroll();
+            tv_scoll.starScroll();
+        }
+    };
 
     @SuppressLint("WrongViewCast")
     @Override
@@ -178,7 +219,7 @@ public class SpeechActivity extends DemoMessagesActivity
 
         tv_scoll = (FloatTextView) findViewById(R.id.tv_menuname);
 
-        tv_scoll.initScrollTextView(getWindowManager(), "next station", 1);
+        tv_scoll.initScrollTextView(getWindowManager(), scrollText, 1);
 //        tv_scoll.setText("welcome to bus!");
         tv_scoll.starScroll();
 
@@ -271,8 +312,41 @@ public class SpeechActivity extends DemoMessagesActivity
 //        requestMicrophonePermission();
 //        startRecording();
 //        startRecognition();
+        scrollTimer.schedule(new TimerTask() {
+            @Override
+            public void run(){
+                // TODO Auto-generated method stub
+                android.os.Message message = new android.os.Message();
+                message.what = 1;
+                scrollHandler.sendMessage(message);
+            }
+        }, 20000, 100000);
+
+        location = new SimpleLocation(this);
+
+        // if we can't access the location yet
+        if (!location.hasLocationEnabled()) {
+            // ask the user to enable location access
+            SimpleLocation.openSettings(this);
+        }
+
+        location.setListener(new SimpleLocation.Listener() {
+
+            public void onPositionChanged() {
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+                Log.d("location update", latitude + " " + longitude);
+            }
+
+        });
+        location.beginUpdates();
         that = this;
     }
+
+//    private String getLOcation(){
+//        // construct a new instance of SimpleLocation
+//        return latitude + "-" + longitude;
+//    }
 
     private boolean hasPermission() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
@@ -489,10 +563,6 @@ public class SpeechActivity extends DemoMessagesActivity
     public boolean onSubmit(final CharSequence input, final String userID) throws IOException {
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(input.toString(), userID), true);
-//        tv_scoll.setText("welcome to bus!");
-        tv_scoll.initScrollTextView(getWindowManager(), "welcome to bus!", 4);
-        tv_scoll.stopScroll();
-        tv_scoll.starScroll();
 //        Log.d(LOG_TAG, bus);
 //        String[] inputs = {bus, input.toString()};
 //        ResponseString responseString = new ResponseString();
@@ -632,6 +702,36 @@ public class SpeechActivity extends DemoMessagesActivity
                 e.printStackTrace();
             }
             return textMessage;
+        }
+    }
+
+    class ResponseLocationMessage implements Callable<String> {
+        private String response_str;
+        private String input;
+        private String bus_id;
+
+        ResponseLocationMessage(String input, String bus_id) {
+            this.input = input;
+            this.bus_id = bus_id;
+        }
+
+        @Override
+        public String call() {
+            Call<TextMessage> textInfo = null;
+            Call<TextMessage> textInfo1 = null;
+            response_str = "";
+            try {
+                Log.d("location call", latitude + " " + longitude);
+                //textInfo = httpUtil.getTextMessageLoc(bus, latitude, longitude, input);
+                String lat = Double.toString(latitude);
+                String lon = Double.toString(longitude);
+                textInfo1 = httpUtil.getTextMessageLoc(bus, lat + "," + lon);
+                response_str = textInfo.execute().body().getResponse_str();
+                textInfo1.execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return response_str;
         }
     }
 

@@ -43,17 +43,17 @@ public class FloatTextView extends android.support.v7.widget.AppCompatTextView {
 
         this.text = text;
         this.sudu = su;
-        textLength = paint.measureText(text);//
-        viewWidth = this.getWidth();//
+        textLength = paint.measureText(text);
+        viewWidth = this.getWidth();
         if (viewWidth == 0) {
 
             Display display = windowManager.getDefaultDisplay();
-            viewWidth = display.getWidth();//
+            viewWidth = display.getWidth();
 
         }
         tx = textLength;
         temp_tx1 = viewWidth + textLength;
-        temp_tx2 = viewWidth + textLength * 2;//
+        temp_tx2 = viewWidth + textLength * 2;
 
         ty = this.getTextSize() + this.getPaddingTop();
     }
@@ -74,12 +74,10 @@ public class FloatTextView extends android.support.v7.widget.AppCompatTextView {
     protected void onDraw(Canvas canvas) {
         if (isStarting) {
 
-            paint.setARGB(255, 200, 200, 200);
+            paint.setARGB(255, 120, 120, 120);
             canvas.drawText(text, temp_tx1 - tx, ty, paint);
             tx += sudu;
-            // 当文字滚动到屏幕的最左边
             if (tx > temp_tx2) {
-                // 把文字设置到最右边开始
                 tx = textLength;
             }
             this.invalidate();// flash screen
