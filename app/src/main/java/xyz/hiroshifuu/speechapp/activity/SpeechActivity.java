@@ -77,6 +77,7 @@ import xyz.hiroshifuu.speechapp.commons.Message;
 import xyz.hiroshifuu.speechapp.R;
 import xyz.hiroshifuu.speechapp.commons.ProperUtil;
 import xyz.hiroshifuu.speechapp.commons.MessagesFixtures;
+import xyz.hiroshifuu.speechapp.models.LocationMessage;
 import xyz.hiroshifuu.speechapp.models.TextMessage;
 import xyz.hiroshifuu.speechapp.utils.RetrofitClientInstance;
 
@@ -147,17 +148,16 @@ public class SpeechActivity extends DemoMessagesActivity
     private Handler scrollHandler = new Handler() {
         @Override
         public void handleMessage(android.os.Message msg) {
-            // TODO Auto-generated method stub
-            super.handleMessage(msg);
-            //        tv_scoll.setText("welcome to bus!");
             ExecutorService scrollExecutor = Executors.newCachedThreadPool();
             ResponseLocationMessage response_Message = new ResponseLocationMessage("input", bus);
-            Future<String> result = scrollExecutor.submit(response_Message);
+            Future<LocationMessage> result = scrollExecutor.submit(response_Message);
 
-            String textMessage = null;
+            LocationMessage locationMessage = null;
+            String textMessage = "";
 
             try {
-                textMessage = result.get();
+                locationMessage = result.get();
+                textMessage = locationMessage.getResponse_location();
             } catch (ExecutionException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
@@ -165,20 +165,27 @@ public class SpeechActivity extends DemoMessagesActivity
             }
             if (textMessage != "") {
                 scrollText = textMessage;
+                Log.d(LOG_TAG,textMessage);
+                refreshUI(textMessage);
 
             } else {
                 Log.d("adapter error:", "can not get location info!");
             }
-
-            tv_scoll.initScrollTextView(getWindowManager(), scrollText, 4);
+            super.handleMessage(msg);
+        }
+        public void refreshUI(String scrollTexts){
+            Log.d(LOG_TAG, scrollTexts);
+            tv_scoll.initScrollTextView(getWindowManager(), scrollTexts, 4);
+            Log.d(LOG_TAG, "scrollText"+"1");
             tv_scoll.stopScroll();
             tv_scoll.starScroll();
         }
     };
 
+
     @SuppressLint("WrongViewCast")
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+        protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.avtive_chat_dialog);
 
@@ -320,7 +327,7 @@ public class SpeechActivity extends DemoMessagesActivity
                 message.what = 1;
                 scrollHandler.sendMessage(message);
             }
-        }, 20000, 100000);
+        }, 20000, 1000000);
 
         location = new SimpleLocation(this);
 
@@ -705,7 +712,7 @@ public class SpeechActivity extends DemoMessagesActivity
         }
     }
 
-    class ResponseLocationMessage implements Callable<String> {
+    class ResponseLocationMessage implements Callable<LocationMessage> {
         private String response_str;
         private String input;
         private String bus_id;
@@ -716,22 +723,21 @@ public class SpeechActivity extends DemoMessagesActivity
         }
 
         @Override
-        public String call() {
-            Call<TextMessage> textInfo = null;
-            Call<TextMessage> textInfo1 = null;
-            response_str = "";
+        public LocationMessage call() {
+            Call<LocationMessage> textInfo = null;
+            LocationMessage locationMessage = null;
             try {
                 Log.d("location call", latitude + " " + longitude);
                 //textInfo = httpUtil.getTextMessageLoc(bus, latitude, longitude, input);
                 String lat = Double.toString(latitude);
                 String lon = Double.toString(longitude);
-                textInfo1 = httpUtil.getTextMessageLoc(bus, lat + "," + lon);
-                response_str = textInfo.execute().body().getResponse_str();
-                textInfo1.execute();
+                textInfo = httpUtil.getTextMessageLoc(bus, lat + "," + lon);
+                locationMessage = textInfo.execute().body();
+//                textInfo.execute();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return response_str;
+            return locationMessage;
         }
     }
 
