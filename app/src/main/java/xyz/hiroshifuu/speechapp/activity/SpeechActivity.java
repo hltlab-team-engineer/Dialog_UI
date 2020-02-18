@@ -276,6 +276,7 @@ public class SpeechActivity extends DemoMessagesActivity
 
         // Load the labels for the model, but only display those that don't start
         // with an underscore.
+
 //        String actualLabelFilename = LABEL_FILENAME.split("file:///android_asset/", -1)[1];
 //        Log.i(LOG_TAG, "Reading labels from: " + actualLabelFilename);
 //        BufferedReader br = null;
@@ -319,6 +320,8 @@ public class SpeechActivity extends DemoMessagesActivity
 //        requestMicrophonePermission();
 //        startRecording();
 //        startRecognition();
+
+
         scrollTimer.schedule(new TimerTask() {
             @Override
             public void run(){
