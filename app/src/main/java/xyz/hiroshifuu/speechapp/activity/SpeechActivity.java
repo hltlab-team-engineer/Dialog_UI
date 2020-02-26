@@ -903,16 +903,17 @@ public class SpeechActivity extends DemoMessagesActivity
     }
 
     private void TTS_speak(String speech) {
-//        setVolumeControlStream(AudioManager.STREAM_MUSIC);
-//        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        int amStreamMusicVol = am.getStreamVolume(AudioManager.STREAM_RING);
 //        int amStreamMusicMaxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 //        am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol, 0);
-//
-//        Bundle bundle = new Bundle();
-//        bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
-//        bundle.putInt(TextToSpeech.Engine.KEY_PARAM_VOLUME, amStreamMusicMaxVol);
-//
-//        tts.speak(speech, TextToSpeech.QUEUE_FLUSH, null, null);
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
+        bundle.putInt(TextToSpeech.Engine.KEY_PARAM_VOLUME, amStreamMusicVol);
+
+        tts.speak(speech, TextToSpeech.QUEUE_FLUSH, null, null);
     }
 
     private void checkPermission() {
