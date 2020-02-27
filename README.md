@@ -1,4 +1,4 @@
-﻿## Description
+## Description
 This project is android UI for dialogue system
 
 ## Still pending issues
@@ -6,7 +6,7 @@ This project is android UI for dialogue system
 - scrolling message (solved now- in optimized UI)
 
 ## The framework of this system
-![image text](https://github.com/maulikmadhavi/Dialog_UI/tree/caiqing-map/framework/framework.PNG)
+![image text](framework/framework.PNG)
 
 ## How to create wakeup words system
 1. train your wakeup words recognize model by tensorflow
