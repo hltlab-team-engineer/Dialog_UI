@@ -108,7 +108,7 @@ public class SpeechActivity extends DemoMessagesActivity
     private int[] grantResults;
 
     private static final int SAMPLE_RATE = 16000;
-    private static final int SAMPLE_DURATION_MS = 1400;
+    private static final int SAMPLE_DURATION_MS = 800;
     private static final int RECORDING_LENGTH = (int) (SAMPLE_RATE * SAMPLE_DURATION_MS / 1000);
     private static final long AVERAGE_WINDOW_DURATION_MS = 1000;
     private static final float DETECTION_THRESHOLD = 0.50f;
