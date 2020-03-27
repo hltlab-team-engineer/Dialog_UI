@@ -11,7 +11,15 @@ This project is android UI for dialogue system
 ## How to create wakeup words system
 1. train your wakeup words recognize model by tensorflow
 
-TODO ADD BY Maulik
+In order to train the wakeword system model, we have used tensorflow and convert the neural network parameters in `tflite` format. The model and the labels are kept inside the `assets` dir under the main.
+
+```
+Dialog_UI/app/src/main/assets/conv_labels.txt
+Dialog_UI/app/src/main/assets/retrained_graph.tflite
+```
+The source code to generate these files is available at
+`https://github.com/maulikmadhavi/Hellobus_tflite`
+
 
 2. add plugin `tflite` at the file `build.gradle` of project
 
