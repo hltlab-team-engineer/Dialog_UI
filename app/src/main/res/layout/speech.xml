@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:ignore="ExtraText">
+
+
+
+    <Button
+        android:id="@+id/start_listen_btn"
+        android:layout_width="56dp"
+        android:layout_height="44dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="16dp"
+        android:layout_marginBottom="2dp"
+        android:background="@drawable/microphone"
+        android:textColor="#1a4067"
+        android:textStyle="italic" />
+
+    <EditText
+        android:id="@+id/result_tv2"
+        android:layout_width="290dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="83dp"
+        android:layout_marginBottom="0dp"
+        android:ems="10"
+        android:imeOptions="actionSend"
+        android:inputType="textPersonName"
+        tools:text="Type in a question..." />
+
+    <ScrollView
+        android:id="@+id/scrollview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/start_listen_btn"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="24dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:background="#ffffff"
+            android:orientation="horizontal">
+
+            <ListView
+                android:id="@+id/list"
+                android:layout_width="match_parent"
+                android:layout_height="642dp"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="-2dp"
+                android:transcriptMode="alwaysScroll"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</RelativeLayout>
