@@ -103,6 +103,7 @@
             android:layout_alignParentBottom="true"
             app:inputHint="@string/hint_enter_a_message"
             app:showAttachmentButton="true" />
+
     </RelativeLayout>
 
 

@@ -34,6 +34,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
+import com.stfalcon.chatkit.commons.models.IMessage;
+import com.stfalcon.chatkit.commons.models.MessageContentType;
 
 import org.tensorflow.lite.Interpreter;
 import org.w3c.dom.Text;
@@ -225,6 +227,14 @@ public class SpeechActivity extends DemoMessagesActivity
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(welcome_info3, "1"), true);
 
+        super.messagesAdapter.addToStart(
+                MessagesFixtures.getImageMessage("\\D:\\Mar20\\Dialog_UI-master (1)\\Dialog_UI-master\\app\\src\\main\\res\\drawable\\map_demo.png", "1"), true);
+
+      //  public String getImageUrl() {
+      //       return image == null ? null : image.url;
+        // }
+
+
         RichLinkView richLinkView;
        // protected void onCreate (Bundle savedInstanceState) {
             //super.onCreate(savedInstanceState);
@@ -235,7 +245,7 @@ public class SpeechActivity extends DemoMessagesActivity
 
         //  Picasso.get().load(metaData.imageurl).into(imgPreview)
 
-            richLinkView.setLink("https://www.google.com/maps/dir/?api=1&origin=Sembwang&destination=Clementi&travelmode=transit", new ViewListener() {
+            richLinkView.setLink("https://www.google.com/maps/dir/Sembawang/National+University+of+Singapore,+21+Lower+Kent+Ridge+Rd,+Singapore+119077/@1.3706059,103.727092,12z/data=!3m1!4b1!4m14!4m13!1m5!1m1!1s0x31da13622c24a83d:0x500f7acaedaa6d0!2m2!1d103.8184954!2d1.4491107!1m5!1m1!1s0x31da1a56784202d9:0x488d08d6c1f88d6b!2m2!1d103.7763939!2d1.2966426!3e3", new ViewListener() {
 
             @Override
             public void onSuccess(boolean status) {
@@ -247,9 +257,6 @@ public class SpeechActivity extends DemoMessagesActivity
 
             }
         });
-        String welcome_info4 = "https://www.google.com/maps/dir/?api=1&origin=Sembwang&destination=Clementi&travelmode=transit";
-        super.messagesAdapter.addToStart(
-                MessagesFixtures.getTextMessage(welcome_info4, "1"), true);
 
 
         input = (MessageInput) this.findViewById(R.id.input2);
@@ -309,6 +316,7 @@ public class SpeechActivity extends DemoMessagesActivity
         // Load the labels for the model, but only display those that don't start
         // with an underscore.
     if(wakeupflag==true) {
+
         String actualLabelFilename = LABEL_FILENAME.split("file:///android_asset/", -1)[1];
         Log.i(LOG_TAG, "Reading labels from: " + actualLabelFilename);
         BufferedReader br = null;
