@@ -64,15 +64,14 @@
     <RelativeLayout
         android:id="@+id/tv_float_view2"
         android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_height="1dp"
         android:layout_below="@+id/tv_float_view"
         android:layout_marginTop="-2dp">
 
         <io.github.ponnamkarthik.richlinkpreview.RichLinkView
             android:id="@+id/richLinkView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-        </io.github.ponnamkarthik.richlinkpreview.RichLinkView>
+            android:layout_height="wrap_content"></io.github.ponnamkarthik.richlinkpreview.RichLinkView>
 
     </RelativeLayout>
 

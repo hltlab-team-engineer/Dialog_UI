@@ -126,7 +126,7 @@ public class SpeechActivity extends DemoMessagesActivity
     private Interpreter tfLite;
 
     // UI elements.
-    private final boolean wakeupflag=true;
+    private final boolean wakeupflag=false;
     private static final int REQUEST_RECORD_AUDIO = 13;
     private static final String LOG_TAG = SpeechActivity.class.getSimpleName();
 
@@ -214,22 +214,22 @@ public class SpeechActivity extends DemoMessagesActivity
                 MessagesFixtures.getTextMessage(welcome_info, "1"), true);
 
                 TTS_speak(welcome_info);
+//
+//        String welcome_info1 = "To ask location: How can I go to changi airport? ";
+//        super.messagesAdapter.addToStart(
+//                MessagesFixtures.getTextMessage(welcome_info1, "1"), true);
+//
+//        String welcome_info2 = "To ask help in emergency: Please help there is emergency..";
+//        super.messagesAdapter.addToStart(
+//                MessagesFixtures.getTextMessage(welcome_info2, "1"), true);
+//
+//        String welcome_info3 = "To ask general questions: What is LTA Singapore?";
+//        super.messagesAdapter.addToStart(
+//                MessagesFixtures.getTextMessage(welcome_info3, "1"), true);
 
-        String welcome_info1 = "To ask location: How can I go to changi airport? ";
-        super.messagesAdapter.addToStart(
-                MessagesFixtures.getTextMessage(welcome_info1, "1"), true);
-
-        String welcome_info2 = "To ask help in emergency: Please help there is emergency..";
-        super.messagesAdapter.addToStart(
-                MessagesFixtures.getTextMessage(welcome_info2, "1"), true);
-
-        String welcome_info3 = "To ask general questions: What is LTA Singapore?";
-        super.messagesAdapter.addToStart(
-                MessagesFixtures.getTextMessage(welcome_info3, "1"), true);
-
-        super.messagesAdapter.addToStart(
-                MessagesFixtures.getImageMessage("http://104.43.15.41:5001/Dialog_Engine/imgs/map.png", "1"), true);
-                //MessagesFixtures.getImageMessage("https://drive.google.com/drive/folders/1ZT5bZ1UBL83QfOTvwJNH5WGsFu9NFSnD", "1"), true);
+//        super.messagesAdapter.addToStart(
+//                MessagesFixtures.getImageMessage("http://104.43.15.41:5001/Dialog_Engine/imgs/map.png", "1"), true);
+//                //MessagesFixtures.getImageMessage("https://drive.google.com/drive/folders/1ZT5bZ1UBL83QfOTvwJNH5WGsFu9NFSnD", "1"), true);
 
       //  public String getImageUrl() {
       //       return image == null ? null : image.url;
@@ -627,10 +627,13 @@ public class SpeechActivity extends DemoMessagesActivity
         TextMessage textMessage = null;
         String response_str = "";
         String emergency_flag = "0";
+        String url_flag="0";
         try {
             textMessage = result.get();
             response_str = textMessage.getResponse_str();
             emergency_flag = textMessage.getEmergency_flag();
+            url_flag = textMessage.getUrl_flag();
+            Log.d(LOG_TAG, url_flag);
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -647,6 +650,14 @@ public class SpeechActivity extends DemoMessagesActivity
                 }
             }
 
+            if (url_flag !="0"){
+                Log.d(LOG_TAG, "+++>>"+url_flag);
+                super.messagesAdapter.addToStart(
+                        MessagesFixtures.getImageMessage(url_flag, "1"), true);
+
+            }
+
+
         } else {
             Log.d("adapter error:", "can not get response info!");
         }
@@ -660,6 +671,11 @@ public class SpeechActivity extends DemoMessagesActivity
                     if (index == 0) {
                         TTS_speak(newText);
                     }
+                }
+                if (url_flag !="0"){
+                    super.messagesAdapter.addToStart(
+                            MessagesFixtures.getImageMessage(url_flag, "1"), true);
+
                 }
 
             } else {
@@ -850,10 +866,12 @@ public class SpeechActivity extends DemoMessagesActivity
         TextMessage textMessage = null;
         String response_str = "";
         String emergency_flag = "0";
+        String url_flag="0";
         try {
             textMessage = result.get();
             response_str = textMessage.getResponse_str();
             emergency_flag = textMessage.getEmergency_flag();
+            url_flag = textMessage.getUrl_flag();
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -869,8 +887,11 @@ public class SpeechActivity extends DemoMessagesActivity
                 if (index == 0) {
                     TTS_speak(newText);
                 }
-
             }
+            if (url_flag!="0"){
+                super.messagesAdapter.addToStart(MessagesFixtures.getImageMessage(url_flag,"1"),true);
+            }
+
         } else {
             Log.d("adapter error:", "can not get response info!");
         }
