@@ -228,7 +228,8 @@ public class SpeechActivity extends DemoMessagesActivity
                 MessagesFixtures.getTextMessage(welcome_info3, "1"), true);
 
         super.messagesAdapter.addToStart(
-                MessagesFixtures.getImageMessage("\\D:\\Mar20\\Dialog_UI-master (1)\\Dialog_UI-master\\app\\src\\main\\res\\drawable\\map_demo.png", "1"), true);
+                MessagesFixtures.getImageMessage("http://104.43.15.41:5001/Dialog_Engine/imgs/map.png", "1"), true);
+                //MessagesFixtures.getImageMessage("https://drive.google.com/drive/folders/1ZT5bZ1UBL83QfOTvwJNH5WGsFu9NFSnD", "1"), true);
 
       //  public String getImageUrl() {
       //       return image == null ? null : image.url;
