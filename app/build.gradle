@@ -1,0 +1,83 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 29
+    defaultConfig {
+        applicationId "xyz.hiroshifuu.speechapp"
+        minSdkVersion 21
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+//        externalNativeBuild {
+//            cmake {
+//                cppFlags ""
+//                abiFilters "armeabi-v7a"
+//            }
+//        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    aaptOptions {
+        noCompress "tflite"
+        noCompress "lite"
+    }
+//    externalNativeBuild {
+//        cmake {
+//            path "src/main/cpp/CMakeLists.txt"
+//        }
+//    }
+    buildToolsVersion '29.0.0'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:appcompat-v7'
+    implementation 'com.googlecode.json-simple:json-simple:1.1'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+//    implementation 'com.android.support:appcompat-v7:29.+'
+//    implementation 'com.android.support:support-compat:28.0.0'
+    implementation 'androidx.annotation:annotation:1.0.2'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'com.android.volley:volley:1.1.0'
+    implementation('com.dlazaro66.qrcodereaderview:qrcodereaderview:2.0.3@aar') {
+        transitive = true
+    }
+    // add retrofit framework
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+    // used for QR code
+    implementation 'com.github.blikoon:QRCodeScanner:0.1.2'
+    // used for chat view
+    implementation 'com.github.stfalcon:chatkit:0.3.3'
+    // Link Preview
+    implementation 'org.jsoup:jsoup:1.11.3'
+    implementation 'io.github.ponnamkarthik:richlinkpreview:1.0.9'
+    implementation 'com.squareup.picasso:picasso:2.71828' //for image loading
+
+    implementation 'com.koushikdutta.async:androidasync:2.2.1'
+    implementation 'commons-io:commons-io:2.5'
+    implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.2.0'
+    implementation 'com.google.android.gms:play-services-maps:16.0.0'
+    implementation 'com.github.delight-im:Android-SimpleLocation:v1.0.1'
+    //    compile project(':aars')
+    implementation project(':aars')
+    implementation project(':models')
+}
+
+repositories {
+    // used for QR code
+    maven { url 'https://jitpack.io' }
+}
