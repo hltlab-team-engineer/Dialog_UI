@@ -152,8 +152,8 @@ public class SpeechActivity extends DemoMessagesActivity
     private double latitude = -999;
     private double longitude = -999;
 
-    private static String TEST_LINK = "https://www.google.com/maps/dir/Sembawang/National+University+of+Singapore,+21+Lower+Kent+Ridge+Rd,+Singapore+119077/@1.3706059,103.727092,12z/data=!3m1!4b1!4m14!4m13!1m5!1m1!1s0x31da13622c24a83d:0x500f7acaedaa6d0!2m2!1d103.8184954!2d1.4491107!1m5!1m1!1s0x31da1a56784202d9:0x488d08d6c1f88d6b!2m2!1d103.7763939!2d1.2966426!3e3";
-
+//    private static String TEST_LINK = "https://www.google.com/maps/dir/Sembawang/National+University+of+Singapore,+21+Lower+Kent+Ridge+Rd,+Singapore+119077/@1.3706059,103.727092,12z/data=!3m1!4b1!4m14!4m13!1m5!1m1!1s0x31da13622c24a83d:0x500f7acaedaa6d0!2m2!1d103.8184954!2d1.4491107!1m5!1m1!1s0x31da1a56784202d9:0x488d08d6c1f88d6b!2m2!1d103.7763939!2d1.2966426!3e3";
+//    public static String TEST_LINK = "https://www.google.com/maps/dir/?api=1&origin=Sembwang&destination=Clementi&travelmode=transit";
     private Handler scrollHandler = new Handler() {
         @Override
         public void handleMessage(android.os.Message msg) {
@@ -213,10 +213,12 @@ public class SpeechActivity extends DemoMessagesActivity
         initAdapter();
 
         String welcome_info = "hello, I am your autonomus bus agent. How can I help you? What kind of information do you want to know?";
+//        super.messagesAdapter.addToStart(
+//                MessagesFixtures.getTextMessage(welcome_info, "1", TEST_LINK), true);
         super.messagesAdapter.addToStart(
-                MessagesFixtures.getTextMessage(welcome_info, "1", TEST_LINK), true);
+                MessagesFixtures.getTextMessage(welcome_info, "1"), true);
 
-        TTS_speak(welcome_info);
+        TTS_speak("Hi how can I help?");
 //
 //        String welcome_info1 = "To ask location: How can I go to changi airport? ";
 //        super.messagesAdapter.addToStart(
@@ -245,22 +247,22 @@ public class SpeechActivity extends DemoMessagesActivity
 //            setContentView(R.layout.list_item_map2);
         // ...
         //
-        richLinkView = (RichLinkView) findViewById(R.id.richLinkView);
-
-        //  Picasso.get().load(metaData.imageurl).into(imgPreview)
-
-        richLinkView.setLink("https://www.google.com/maps/dir/Sembawang/National+University+of+Singapore,+21+Lower+Kent+Ridge+Rd,+Singapore+119077/@1.3706059,103.727092,12z/data=!3m1!4b1!4m14!4m13!1m5!1m1!1s0x31da13622c24a83d:0x500f7acaedaa6d0!2m2!1d103.8184954!2d1.4491107!1m5!1m1!1s0x31da1a56784202d9:0x488d08d6c1f88d6b!2m2!1d103.7763939!2d1.2966426!3e3", new ViewListener() {
-
-            @Override
-            public void onSuccess(boolean status) {
-
-            }
-
-            @Override
-            public void onError(Exception e) {
-
-            }
-        });
+//        richLinkView = (RichLinkView) findViewById(R.id.richLinkView);
+//
+//        //  Picasso.get().load(metaData.imageurl).into(imgPreview)
+//
+//        richLinkView.setLink("https://www.google.com/maps/dir/Sembawang/National+University+of+Singapore,+21+Lower+Kent+Ridge+Rd,+Singapore+119077/@1.3706059,103.727092,12z/data=!3m1!4b1!4m14!4m13!1m5!1m1!1s0x31da13622c24a83d:0x500f7acaedaa6d0!2m2!1d103.8184954!2d1.4491107!1m5!1m1!1s0x31da1a56784202d9:0x488d08d6c1f88d6b!2m2!1d103.7763939!2d1.2966426!3e3", new ViewListener() {
+//
+//            @Override
+//            public void onSuccess(boolean status) {
+//
+//            }
+//
+//            @Override
+//            public void onError(Exception e) {
+//
+//            }
+//        });
 
 
         input = (MessageInput) this.findViewById(R.id.input2);
@@ -631,6 +633,7 @@ public class SpeechActivity extends DemoMessagesActivity
         String response_str = "";
         String emergency_flag = "0";
         String url_flag = "0";
+        Log.d("BEFORE", url_flag);
         try {
             textMessage = result.get();
             response_str = textMessage.getResponse_str();
@@ -642,43 +645,47 @@ public class SpeechActivity extends DemoMessagesActivity
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        Log.d("AFTER", url_flag);
         if (response_str != "") {
             String[] response_strs = response_str.split("::\\\\n");
             for (int index = 0; index < response_strs.length; index++) {
                 String newText = response_strs[index].replace("\\n", "\n");
+
                 super.messagesAdapter.addToStart(
-                        MessagesFixtures.getTextMessage(newText, "1", TEST_LINK), true);
+                        MessagesFixtures.getTextMessage(newText, "1"), true);
+
                 if (index == 0) {
                     TTS_speak(newText);
                 }
+//                if (index == response_strs.length -1)
+//                {
+//                    super.messagesAdapter.addToStart(
+//                            MessagesFixtures.getTextMessage(TEST_LINK, "1"), true);
+//                }
             }
 
-            if (url_flag != "0") {
+
+            if (!url_flag.equals("0")) {
                 Log.d(LOG_TAG, "+++>>" + url_flag);
-                super.messagesAdapter.addToStart(
-                        MessagesFixtures.getImageMessage(url_flag, "1"), true);
-
+//                super.messagesAdapter.addToStart(
+//                        MessagesFixtures.getImageMessage(url_flag, "1"), true);
+                        super.messagesAdapter.addToStart(
+                MessagesFixtures.getTextMessage("", "1", url_flag), true);
             }
-
+            Log.d("url_log","else part");
 
         } else {
-            Log.d("adapter error:", "can not get response info!");
+            Log.d("url error:", "can not get response info!");
         }
         if (emergency_flag.equals("1")) {
             if (response_str != "") {
+                Log.d("url_log","indide emergeny not response");
                 String[] response_strs = response_str.split("::\\\\n");
                 for (int index = 0; index < response_strs.length; index++) {
                     String newText = response_strs[index].replace("\\n", "\n");
-                    super.messagesAdapter.addToStart(
-                            MessagesFixtures.getTextMessage(newText, "1"), true);
                     if (index == 0) {
                         TTS_speak(newText);
                     }
-                }
-                if (url_flag != "0") {
-                    super.messagesAdapter.addToStart(
-                            MessagesFixtures.getImageMessage(url_flag, "1"), true);
-
                 }
 
             } else {
@@ -889,10 +896,18 @@ public class SpeechActivity extends DemoMessagesActivity
                     TTS_speak(newText);
                 }
             }
-            if (url_flag != "0") {
-                super.messagesAdapter.addToStart(MessagesFixtures.getImageMessage(url_flag, "1"), true);
+//            if (url_flag != "0") {
+//                super.messagesAdapter.addToStart(MessagesFixtures.getTextMessage(TEST_LINK, "1"), true);
+//            }
+            if (!url_flag.equals("0")) {
+                Log.d(LOG_TAG, "+++>>" + url_flag);
+//                super.messagesAdapter.addToStart(
+//                        MessagesFixtures.getImageMessage(url_flag, "1"), true);
+                super.messagesAdapter.addToStart(
+                        MessagesFixtures.getTextMessage("", "1", url_flag), true);
             }
-
+//            super.messagesAdapter.addToStart(
+//                    MessagesFixtures.getTextMessage("", "1", url_flag), true);
         } else {
             Log.d("adapter error:", "can not get response info!");
         }
@@ -965,7 +980,7 @@ public class SpeechActivity extends DemoMessagesActivity
         Bundle b = getIntent().getExtras();
         if (b != null)
             bus = b.getString("bus");
-        String welcome_info = "hello, how can I help you? What kind of information do you want to know?";
+        String welcome_info = "hello, how can I help you";
 //        TTS_speak("TTS is ready, Bus ID is : " + bus);
         TTS_speak(welcome_info);
     }
@@ -973,16 +988,29 @@ public class SpeechActivity extends DemoMessagesActivity
     private void TTS_speak(String speech) {
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        int amStreamMusicVol = am.getStreamVolume(AudioManager.STREAM_RING);
-//        int amStreamMusicMaxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-//        am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol, 0);
+        int amStreamMusicMaxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol, 0);
 
         Bundle bundle = new Bundle();
         bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
-        bundle.putInt(TextToSpeech.Engine.KEY_PARAM_VOLUME, amStreamMusicVol);
+        bundle.putInt(TextToSpeech.Engine.KEY_PARAM_VOLUME, amStreamMusicMaxVol);
 
         tts.speak(speech, TextToSpeech.QUEUE_FLUSH, null, null);
     }
+
+//    private void TTS_speak(String speech) {
+//        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+//        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+//        int amStreamMusicVol = am.getStreamVolume(AudioManager.STREAM_RING);
+////        int amStreamMusicMaxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+////        am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol, 0);
+//
+//        Bundle bundle = new Bundle();
+//        bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
+//        bundle.putInt(TextToSpeech.Engine.KEY_PARAM_VOLUME, amStreamMusicVol);
+//
+//        tts.speak(speech, TextToSpeech.QUEUE_FLUSH, null, null);
+//    }
 
     private void checkPermission() {
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//initialise locationManager
