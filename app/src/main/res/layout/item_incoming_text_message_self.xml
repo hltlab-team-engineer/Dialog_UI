@@ -11,8 +11,8 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:contentDescription="@string/chatbot_icon"
         android:visibility="visible"
         app:srcCompat="@drawable/chatbot" />
@@ -23,7 +23,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:layout_marginStart="28dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginLeft="32dp"
         android:layout_marginEnd="@dimen/message_outcoming_bubble_margin_left"
         android:layout_marginRight="@dimen/message_outcoming_bubble_margin_left"
         app:alignContent="stretch"
