@@ -97,7 +97,6 @@ public class SpeechActivity extends DemoMessagesActivity
     private static HttpUtil httpUtil;
     // UI elements.
     private final boolean wakeupflag = false;
-    private boolean IS_SPEACKING = false;
     private final ReentrantLock recordingBufferLock = new ReentrantLock();
     private final Timer scrollTimer = new Timer();
     public String res;
@@ -106,6 +105,7 @@ public class SpeechActivity extends DemoMessagesActivity
     int recordingOffset = 0;
     boolean shouldContinue = true;
     boolean shouldContinueRecognition = true;
+    private boolean IS_SPEACKING = false;
     private Properties my_property;
     private TextToSpeech tts;
     private TextView textView; //Show location in textview
