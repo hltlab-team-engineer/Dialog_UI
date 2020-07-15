@@ -18,7 +18,6 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,17 +32,11 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
-import com.stfalcon.chatkit.commons.models.IMessage;
-import com.stfalcon.chatkit.commons.models.MessageContentType;
-
 import org.tensorflow.lite.Interpreter;
-import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -65,24 +58,20 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import im.delight.android.location.SimpleLocation;
 import io.github.ponnamkarthik.richlinkpreview.RichLinkView;
-import io.github.ponnamkarthik.richlinkpreview.ViewListener;
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import xyz.hiroshifuu.speechapp.R;
+import xyz.hiroshifuu.speechapp.commons.AppUtils;
 import xyz.hiroshifuu.speechapp.commons.FloatTextView;
 import xyz.hiroshifuu.speechapp.commons.HttpUtil;
+import xyz.hiroshifuu.speechapp.commons.Message;
+import xyz.hiroshifuu.speechapp.commons.MessagesFixtures;
 import xyz.hiroshifuu.speechapp.commons.PermissionHandler;
+import xyz.hiroshifuu.speechapp.commons.ProperUtil;
 import xyz.hiroshifuu.speechapp.commons.RecognizeCommands;
 import xyz.hiroshifuu.speechapp.commons.SpeechRecognizerManager;
 import xyz.hiroshifuu.speechapp.messages.MessageInput;
 import xyz.hiroshifuu.speechapp.messages.MessagesList;
 import xyz.hiroshifuu.speechapp.messages.MessagesListAdapter;
-
-import xyz.hiroshifuu.speechapp.commons.AppUtils;
-import xyz.hiroshifuu.speechapp.commons.Message;
-import xyz.hiroshifuu.speechapp.R;
-import xyz.hiroshifuu.speechapp.commons.ProperUtil;
-import xyz.hiroshifuu.speechapp.commons.MessagesFixtures;
 import xyz.hiroshifuu.speechapp.models.LocationMessage;
 import xyz.hiroshifuu.speechapp.models.TextMessage;
 import xyz.hiroshifuu.speechapp.utils.RetrofitClientInstance;
@@ -92,30 +81,9 @@ public class SpeechActivity extends DemoMessagesActivity
         MessageInput.TypingListener,
         TextToSpeech.OnInitListener {
 
-    private Properties my_property;
-
-    private TextToSpeech tts;
-    private static String bus = "NO_BUS";
-    public String res;
-    private TextView textView; //Show location in textview
-    private LocationManager locationManager; //instance to access location services
-    private LocationListener locationListener;//listen for location changes
-
-    private MessagesList messagesList;
-    private SpeechRecognizerManager mSpeechManager;
-    private MessageInput input;
-    private Activity that;
-
-    private static HttpUtil httpUtil;
-
-    private ImageButton callPhone;
-    private int requestCode;
-    private String[] permissions;
-    private int[] grantResults;
-
     private static final int SAMPLE_RATE = 16000;
     private static final int SAMPLE_DURATION_MS = 800;
-    private static final int RECORDING_LENGTH = (int) (SAMPLE_RATE * SAMPLE_DURATION_MS / 1000);
+    private static final int RECORDING_LENGTH = SAMPLE_RATE * SAMPLE_DURATION_MS / 1000;
     private static final long AVERAGE_WINDOW_DURATION_MS = 1000;
     private static final float DETECTION_THRESHOLD = 0.50f;
     private static final int SUPPRESSION_MS = 500;
@@ -123,27 +91,40 @@ public class SpeechActivity extends DemoMessagesActivity
     private static final long MINIMUM_TIME_BETWEEN_SAMPLES_MS = 30;
     private static final String LABEL_FILENAME = "file:///android_asset/conv_labels.txt";
     private static final String MODEL_FILENAME = "file:///android_asset/retrained_graph.tflite";
-    private Interpreter tfLite;
-
-    // UI elements.
-    private final boolean wakeupflag = false;
     private static final int REQUEST_RECORD_AUDIO = 13;
     private static final String LOG_TAG = SpeechActivity.class.getSimpleName();
-
+    private static String bus = "NO_BUS";
+    private static HttpUtil httpUtil;
+    // UI elements.
+    private final boolean wakeupflag = false;
+    private boolean IS_SPEACKING = false;
+    private final ReentrantLock recordingBufferLock = new ReentrantLock();
+    private final Timer scrollTimer = new Timer();
+    public String res;
     // Working variables.
     short[] recordingBuffer = new short[RECORDING_LENGTH];
     int recordingOffset = 0;
     boolean shouldContinue = true;
-    private Thread recordingThread;
     boolean shouldContinueRecognition = true;
+    private Properties my_property;
+    private TextToSpeech tts;
+    private TextView textView; //Show location in textview
+    private LocationManager locationManager; //instance to access location services
+    private LocationListener locationListener;//listen for location changes
+    private MessagesList messagesList;
+    private SpeechRecognizerManager mSpeechManager;
+    private MessageInput input;
+    private Activity that;
+    private ImageButton callPhone;
+    private int requestCode;
+    private String[] permissions;
+    private int[] grantResults;
+    private Interpreter tfLite;
+    private Thread recordingThread;
     private Thread recognitionThread;
-    private final ReentrantLock recordingBufferLock = new ReentrantLock();
-
     private List<String> labels = new ArrayList<String>();
     private List<String> displayedLabels = new ArrayList<>();
     private RecognizeCommands recognizeCommands = null;
-
-    private final Timer scrollTimer = new Timer();
     //    private TimerTask scrollTask;
     private FloatTextView tv_scoll;
     private String scrollText = "welcome to bus!";
@@ -152,7 +133,7 @@ public class SpeechActivity extends DemoMessagesActivity
     private double latitude = -999;
     private double longitude = -999;
 
-//    private static String TEST_LINK = "https://www.google.com/maps/dir/Sembawang/National+University+of+Singapore,+21+Lower+Kent+Ridge+Rd,+Singapore+119077/@1.3706059,103.727092,12z/data=!3m1!4b1!4m14!4m13!1m5!1m1!1s0x31da13622c24a83d:0x500f7acaedaa6d0!2m2!1d103.8184954!2d1.4491107!1m5!1m1!1s0x31da1a56784202d9:0x488d08d6c1f88d6b!2m2!1d103.7763939!2d1.2966426!3e3";
+    //    private static String TEST_LINK = "https://www.google.com/maps/dir/Sembawang/National+University+of+Singapore,+21+Lower+Kent+Ridge+Rd,+Singapore+119077/@1.3706059,103.727092,12z/data=!3m1!4b1!4m14!4m13!1m5!1m1!1s0x31da13622c24a83d:0x500f7acaedaa6d0!2m2!1d103.8184954!2d1.4491107!1m5!1m1!1s0x31da1a56784202d9:0x488d08d6c1f88d6b!2m2!1d103.7763939!2d1.2966426!3e3";
 //    public static String TEST_LINK = "https://www.google.com/maps/dir/?api=1&origin=Sembwang&destination=Clementi&travelmode=transit";
     private Handler scrollHandler = new Handler() {
         @Override
@@ -161,9 +142,9 @@ public class SpeechActivity extends DemoMessagesActivity
             ResponseLocationMessage response_Message = new ResponseLocationMessage("input", bus);
             Future<LocationMessage> result = scrollExecutor.submit(response_Message);
 
-            LocationMessage locationMessage = null;
             String textMessage = "";
 
+            LocationMessage locationMessage = null;
             try {
                 locationMessage = result.get();
                 textMessage = locationMessage.getResponse_location();
@@ -172,6 +153,7 @@ public class SpeechActivity extends DemoMessagesActivity
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
             if (textMessage != "") {
                 scrollText = textMessage;
                 Log.d(LOG_TAG, textMessage);
@@ -192,6 +174,18 @@ public class SpeechActivity extends DemoMessagesActivity
         }
     };
 
+    /**
+     * Memory-map the model file in Assets.
+     */
+    private static MappedByteBuffer loadModelFile(AssetManager assets, String modelFilename)
+            throws IOException {
+        AssetFileDescriptor fileDescriptor = assets.openFd(modelFilename);
+        FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
+        FileChannel fileChannel = inputStream.getChannel();
+        long startOffset = fileDescriptor.getStartOffset();
+        long declaredLength = fileDescriptor.getDeclaredLength();
+        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
+    }
 
     @SuppressLint("WrongViewCast")
     @Override
@@ -209,7 +203,7 @@ public class SpeechActivity extends DemoMessagesActivity
 
         tts = new TextToSpeech(getApplicationContext(), this);
 
-        this.messagesList = (MessagesList) this.findViewById(R.id.messagesList2);
+        this.messagesList = this.findViewById(R.id.messagesList2);
         initAdapter();
 
         String welcome_info = "hello, I am your autonomus bus agent. How can I help you? What kind of information do you want to know?";
@@ -217,8 +211,6 @@ public class SpeechActivity extends DemoMessagesActivity
 //                MessagesFixtures.getTextMessage(welcome_info, "1", TEST_LINK), true);
         super.messagesAdapter.addToStart(
                 MessagesFixtures.getTextMessage(welcome_info, "1"), true);
-
-        TTS_speak("Hi how can I help?");
 //
 //        String welcome_info1 = "To ask location: How can I go to changi airport? ";
 //        super.messagesAdapter.addToStart(
@@ -264,12 +256,11 @@ public class SpeechActivity extends DemoMessagesActivity
 //            }
 //        });
 
-
-        input = (MessageInput) this.findViewById(R.id.input2);
+        input = this.findViewById(R.id.input2);
         input.setInputListener(this);
         input.setTypingListener(this);
 
-        tv_scoll = (FloatTextView) findViewById(R.id.tv_menuname);
+        tv_scoll = findViewById(R.id.tv_menuname);
 
         tv_scoll.initScrollTextView(getWindowManager(), scrollText, 1);
 //        tv_scoll.setText("welcome to bus!");
@@ -278,7 +269,6 @@ public class SpeechActivity extends DemoMessagesActivity
         input.attachmentButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (PermissionHandler.checkPermission(that, PermissionHandler.RECORD_AUDIO)) {
-
                     if (mSpeechManager == null) {
                         SetSpeechListener();
                     } else if (!mSpeechManager.ismIsListening()) {
@@ -288,7 +278,6 @@ public class SpeechActivity extends DemoMessagesActivity
                     //status_tv.setText(getString(R.string.you_may_speak));
                     input.attachmentButton.setClickable(false);
                     input.attachmentButton.getBackground().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
-
                 } else {
                     PermissionHandler.askForPermission(PermissionHandler.RECORD_AUDIO, that);
                 }
@@ -322,7 +311,6 @@ public class SpeechActivity extends DemoMessagesActivity
         // Load the labels for the model, but only display those that don't start
         // with an underscore.
         if (wakeupflag == true) {
-
             String actualLabelFilename = LABEL_FILENAME.split("file:///android_asset/", -1)[1];
             Log.i(LOG_TAG, "Reading labels from: " + actualLabelFilename);
             BufferedReader br = null;
@@ -399,29 +387,8 @@ public class SpeechActivity extends DemoMessagesActivity
         that = this;
     }
 
-//    private String getLOcation(){
-//        // construct a new instance of SimpleLocation
-//        return latitude + "-" + longitude;
-//    }
-
     private boolean hasPermission() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Memory-map the model file in Assets.
-     */
-    private static MappedByteBuffer loadModelFile(AssetManager assets, String modelFilename)
-            throws IOException {
-        AssetFileDescriptor fileDescriptor = assets.openFd(modelFilename);
-        FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
-        FileChannel fileChannel = inputStream.getChannel();
-        long startOffset = fileDescriptor.getStartOffset();
-        long declaredLength = fileDescriptor.getDeclaredLength();
-        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED;
     }
 
     private void requestMicrophonePermission() {
@@ -533,7 +500,6 @@ public class SpeechActivity extends DemoMessagesActivity
     }
 
     private void recognize() {
-
         Log.v(LOG_TAG, "Start recognition");
 
         short[] inputBuffer = new short[RECORDING_LENGTH];
@@ -669,17 +635,17 @@ public class SpeechActivity extends DemoMessagesActivity
                 Log.d(LOG_TAG, "+++>>" + url_flag);
 //                super.messagesAdapter.addToStart(
 //                        MessagesFixtures.getImageMessage(url_flag, "1"), true);
-                        super.messagesAdapter.addToStart(
-                MessagesFixtures.getTextMessage("", "1", url_flag), true);
+                super.messagesAdapter.addToStart(
+                        MessagesFixtures.getTextMessage("", "1", url_flag), true);
             }
-            Log.d("url_log","else part");
+            Log.d("url_log", "else part");
 
         } else {
             Log.d("url error:", "can not get response info!");
         }
         if (emergency_flag.equals("1")) {
             if (response_str != "") {
-                Log.d("url_log","indide emergeny not response");
+                Log.d("url_log", "indide emergeny not response");
                 String[] response_strs = response_str.split("::\\\\n");
                 for (int index = 0; index < response_strs.length; index++) {
                     String newText = response_strs[index].replace("\\n", "\n");
@@ -696,129 +662,26 @@ public class SpeechActivity extends DemoMessagesActivity
         return true;
     }
 
-    /**
-     * replace Callable by AsyncTask, make samaung can work
-     */
-//    private class ResponseString extends AsyncTask<String, Void, String> {
-//        @Override
-//        protected String doInBackground(String... params) {
-//            try {
-//                Log.d(LOG_TAG, params[0] + " " + params[1]);
-//                Call<TextMessage> textInfo = httpUtil.getTextMessage(params[0], params[1]);
-//                if(textInfo.equals(null)){
-//                    Log.d(LOG_TAG, "textInfo is null");
-//                }
-//                Response<TextMessage> execute = textInfo.execute();
-//                if(execute.equals(null)){
-//                    Log.d(LOG_TAG, "execute is null");
-//                }else{
-//                    Log.d(LOG_TAG, execute.toString());
-//                }
-//                TextMessage message = execute.body();
-//
-//                if(!message.equals(null)){
-//                    Log.d(LOG_TAG, message.getResponse_str());
-//                    return  message.getResponse_str();
-//                }else{
-//                    return null;
-//                }
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            return null;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(String response_str) {
-////            String response_str = result;
-//            if (response_str != "" || response_str.equals(null) ) {
-//                Log.d(LOG_TAG, response_str);
-//                String[] response_strs = response_str.split("::\\\\n");
-//                for (int index = 0; index < response_strs.length; index++) {
-//                    String newText = response_strs[index].replace("\\n", "\n");
-//                    messagesAdapter.addToStart(
-//                            MessagesFixtures.getTextMessage(newText, "1"), true);
-//                    if (index == 0) {
-//                        TTS_speak(newText);
-//                    }
-//                }
-//
-//            } else {
-//                Log.d("adapter error:", "can not get response info!");
-//            }
-//        }
-//    }
-
-    class ResponseMessage implements Callable<TextMessage> {
-        private String response_str;
-        private String input;
-        private String bus_id;
-
-        ResponseMessage(String input, String bus_id) {
-            this.input = input;
-            this.bus_id = bus_id;
-        }
-
-        @Override
-        public TextMessage call() {
-            Call<TextMessage> textInfo = null;
-//            response_str = "";
-            TextMessage textMessage = null;
-            try {
-                textInfo = httpUtil.getTextMessage(bus_id, input);
-
-//                TextMessage text = textInfo.execute().body();
-//                Log.d(LOG_TAG, text.toString());
-                textMessage = textInfo.execute().body();
-                response_str = textMessage.getResponse_str();
-                Log.d(LOG_TAG, response_str);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return textMessage;
-        }
-    }
-
-    class ResponseLocationMessage implements Callable<LocationMessage> {
-        private String response_str;
-        private String input;
-        private String bus_id;
-
-        ResponseLocationMessage(String input, String bus_id) {
-            this.input = input;
-            this.bus_id = bus_id;
-        }
-
-        @Override
-        public LocationMessage call() {
-            Call<LocationMessage> textInfo = null;
-            LocationMessage locationMessage = null;
-            try {
-                Log.d("location call", latitude + " " + longitude);
-                //textInfo = httpUtil.getTextMessageLoc(bus, latitude, longitude, input);
-                String lat = Double.toString(latitude);
-                String lon = Double.toString(longitude);
-                textInfo = httpUtil.getTextMessageLoc(bus, lat + "," + lon);
-                locationMessage = textInfo.execute().body();
-//                textInfo.execute();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return locationMessage;
-        }
-    }
-
     private String SetSpeechListener() {
+        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        int amStreamMusicVol = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+        res = "";
+        Log.d("start SpeechListener", String.valueOf(IS_SPEACKING));
+        if (IS_SPEACKING == true) {
+            stopRecording();
+            stopRecognition();
+            input.attachmentButton.getBackground().setColorFilter(null);
+            am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicVol, 0);
+            IS_SPEACKING = false;
+            return res;
+        }
+        IS_SPEACKING = true;
+        input.attachmentButton.getBackground().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
         // stop wakeup record
         if (wakeupflag == true) {
             stopRecording();
             stopRecognition();
         }
-
-        res = "";
-        Log.d("start speech", "start speech");
         mSpeechManager = new SpeechRecognizerManager(this, new SpeechRecognizerManager.onResultsReady() {
             @Override
             public void onResults(ArrayList<String> results) {
@@ -833,9 +696,8 @@ public class SpeechActivity extends DemoMessagesActivity
                 mSpeechManager = null;
                 input.attachmentButton.setClickable(true);
                 input.attachmentButton.getBackground().setColorFilter(null);
-
+                IS_SPEACKING = false;
             }
-
         });
         // start wakeup record
         if (wakeupflag) {
@@ -848,9 +710,8 @@ public class SpeechActivity extends DemoMessagesActivity
                 }
             }, 10000);
         }
-
-        Log.d("after sound", "after sound");
-
+        Log.d("after SpeechListener", String.valueOf(IS_SPEACKING));
+        am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicVol, 0);
         return res;
     }
 
@@ -862,7 +723,6 @@ public class SpeechActivity extends DemoMessagesActivity
     }
 
     private void sendSoundInfo(String info) {
-
 //        String[] inputs = {input.toString(), bus};
 //        ResponseString responseString = new ResponseString();
 //        responseString.execute(inputs);
@@ -967,7 +827,6 @@ public class SpeechActivity extends DemoMessagesActivity
         }
     }
 
-
     @Override
     public void onInit(int status) {
         if (status == TextToSpeech.SUCCESS) {
@@ -988,8 +847,8 @@ public class SpeechActivity extends DemoMessagesActivity
     private void TTS_speak(String speech) {
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        int amStreamMusicVol = am.getStreamVolume(AudioManager.STREAM_RING);
-       // am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol, 0);
+        int amStreamMusicVol = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+        am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicVol, 0);
 
         Bundle bundle = new Bundle();
         bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
@@ -997,20 +856,6 @@ public class SpeechActivity extends DemoMessagesActivity
 
         tts.speak(speech, TextToSpeech.QUEUE_FLUSH, null, null);
     }
-
-//    private void TTS_speak(String speech) {
-//        setVolumeControlStream(AudioManager.STREAM_MUSIC);
-//        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-//        int amStreamMusicVol = am.getStreamVolume(AudioManager.STREAM_RING);
-////        int amStreamMusicMaxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-////        am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol, 0);
-//
-//        Bundle bundle = new Bundle();
-//        bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
-//        bundle.putInt(TextToSpeech.Engine.KEY_PARAM_VOLUME, amStreamMusicVol);
-//
-//        tts.speak(speech, TextToSpeech.QUEUE_FLUSH, null, null);
-//    }
 
     private void checkPermission() {
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//initialise locationManager
@@ -1059,6 +904,65 @@ public class SpeechActivity extends DemoMessagesActivity
                         //configureButton();
                     }
                 }
+        }
+    }
+
+    class ResponseMessage implements Callable<TextMessage> {
+        private String response_str;
+        private String input;
+        private String bus_id;
+
+        ResponseMessage(String input, String bus_id) {
+            this.input = input;
+            this.bus_id = bus_id;
+        }
+
+        @Override
+        public TextMessage call() {
+            Call<TextMessage> textInfo = null;
+//            response_str = "";
+            TextMessage textMessage = null;
+            try {
+                textInfo = httpUtil.getTextMessage(bus_id, input);
+//                TextMessage text = textInfo.execute().body();
+//                Log.d(LOG_TAG, text.toString());
+                textMessage = textInfo.execute().body();
+                response_str = textMessage.getResponse_str();
+                Log.d(LOG_TAG, response_str);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return textMessage;
+        }
+    }
+
+    class ResponseLocationMessage implements Callable<LocationMessage> {
+        private String response_str;
+        private String input;
+        private String bus_id;
+
+        ResponseLocationMessage(String input, String bus_id) {
+            this.input = input;
+            this.bus_id = bus_id;
+        }
+
+        @Override
+        public LocationMessage call() {
+            Call<LocationMessage> textInfo = null;
+            LocationMessage locationMessage = null;
+            try {
+                Log.d("location call", latitude + " " + longitude);
+                //textInfo = httpUtil.getTextMessageLoc(bus, latitude, longitude, input);
+                String lat = Double.toString(latitude);
+                String lon = Double.toString(longitude);
+                textInfo = httpUtil.getTextMessageLoc(bus, lat + "," + lon);
+                locationMessage = textInfo.execute().body();
+//                textInfo.execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return locationMessage;
         }
     }
 
