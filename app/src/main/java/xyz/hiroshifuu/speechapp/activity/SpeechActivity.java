@@ -81,20 +81,20 @@ public class SpeechActivity extends DemoMessagesActivity
         MessageInput.TypingListener,
         TextToSpeech.OnInitListener {
 
-    private static final int SAMPLE_RATE = 16000;
-    private static final int SAMPLE_DURATION_MS = 800;
-    private static final int RECORDING_LENGTH = SAMPLE_RATE * SAMPLE_DURATION_MS / 1000;
-    private static final long AVERAGE_WINDOW_DURATION_MS = 1000;
-    private static final float DETECTION_THRESHOLD = 0.50f;
-    private static final int SUPPRESSION_MS = 500;
-    private static final int MINIMUM_COUNT = 3;
-    private static final long MINIMUM_TIME_BETWEEN_SAMPLES_MS = 30;
+    private static final int SAMPLE_RATE = 16000; // AudioRecord
+    private static final int SAMPLE_DURATION_MS = 800; // AudioRecord
+    private static final int RECORDING_LENGTH = SAMPLE_RATE * SAMPLE_DURATION_MS / 1000; // AudioRecord
+    private static final long AVERAGE_WINDOW_DURATION_MS = 1000; //ASR
+    private static final float DETECTION_THRESHOLD = 0.50f; //ASR
+    private static final int SUPPRESSION_MS = 500; //ASR
+    private static final int MINIMUM_COUNT = 3; //ASR
+    private static final long MINIMUM_TIME_BETWEEN_SAMPLES_MS = 30; //ASR
     private static final String LABEL_FILENAME = "file:///android_asset/conv_labels.txt";
     private static final String MODEL_FILENAME = "file:///android_asset/retrained_graph.tflite";
-    private static final int REQUEST_RECORD_AUDIO = 13;
+    private static final int REQUEST_RECORD_AUDIO = 13; //requestMicrophonePermission
     private static final String LOG_TAG = SpeechActivity.class.getSimpleName();
-    private static String bus = "NO_BUS";
-    private static HttpUtil httpUtil;
+    private static String bus = "NO_BUS"; //Bus No
+    private static HttpUtil httpUtil; //Server connection
     // UI elements.
     private final boolean wakeupflag = false;
     private final ReentrantLock recordingBufferLock = new ReentrantLock();
@@ -153,6 +153,7 @@ public class SpeechActivity extends DemoMessagesActivity
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            Log.d("scrollHandler", textMessage);
 
             if (textMessage != "") {
                 scrollText = textMessage;
@@ -168,7 +169,6 @@ public class SpeechActivity extends DemoMessagesActivity
         public void refreshUI(String scrollTexts) {
             Log.d(LOG_TAG, scrollTexts);
             tv_scoll.initScrollTextView(getWindowManager(), scrollTexts, 4);
-            Log.d(LOG_TAG, "scrollText" + "1");
             tv_scoll.stopScroll();
             tv_scoll.starScroll();
         }
@@ -206,11 +206,11 @@ public class SpeechActivity extends DemoMessagesActivity
         this.messagesList = this.findViewById(R.id.messagesList2);
         initAdapter();
 
-        String welcome_info = "hello, I am your autonomus bus agent. How can I help you? What kind of information do you want to know?";
+//        String welcome_info = "hello, I am your autonomus bus agent. How can I help you? What kind of information do you want to know?";
 //        super.messagesAdapter.addToStart(
 //                MessagesFixtures.getTextMessage(welcome_info, "1", TEST_LINK), true);
         super.messagesAdapter.addToStart(
-                MessagesFixtures.getTextMessage(welcome_info, "1"), true);
+                MessagesFixtures.getTextMessage(getResources().getString(R.string.welcome_info), "1"), true);
 //
 //        String welcome_info1 = "To ask location: How can I go to changi airport? ";
 //        super.messagesAdapter.addToStart(
@@ -284,8 +284,8 @@ public class SpeechActivity extends DemoMessagesActivity
             }
         });
 
+        // Emergency Call
         callPhone = findViewById(R.id.call_phone);
-
         callPhone.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.M)
             public void onClick(View arg0) {
@@ -362,9 +362,10 @@ public class SpeechActivity extends DemoMessagesActivity
                 // TODO Auto-generated method stub
                 android.os.Message message = new android.os.Message();
                 message.what = 1;
+//                Log.d("scrollTimer", message.toString());
                 scrollHandler.sendMessage(message);
             }
-        }, 20000, 1000000);
+        }, 20 * 1000, 100 * 1000);
 
         location = new SimpleLocation(this);
 
@@ -546,13 +547,10 @@ public class SpeechActivity extends DemoMessagesActivity
                         new Runnable() {
                             @Override
                             public void run() {
-
                                 input.attachmentButton.performClick();
-
                             }
                         });
             }
-
             try {
                 // We don't need to run too frequently, so snooze for a bit.
                 Thread.sleep(MINIMUM_TIME_BETWEEN_SAMPLES_MS);
@@ -589,7 +587,6 @@ public class SpeechActivity extends DemoMessagesActivity
 //        String[] inputs = {bus, input.toString()};
 //        ResponseString responseString = new ResponseString();
 //        responseString.execute(inputs);
-        bus = "NO_BUS";
         Log.d(LOG_TAG, bus);
         ExecutorService executor = Executors.newCachedThreadPool();
         ResponseMessage response_Message = new ResponseMessage(input.toString(), bus);
@@ -726,7 +723,6 @@ public class SpeechActivity extends DemoMessagesActivity
 //        String[] inputs = {input.toString(), bus};
 //        ResponseString responseString = new ResponseString();
 //        responseString.execute(inputs);
-        bus = "NO_BUS";
         ExecutorService executor = Executors.newCachedThreadPool();
         ResponseMessage response_Message = new ResponseMessage(info, bus);
         Future<TextMessage> result = executor.submit(response_Message);

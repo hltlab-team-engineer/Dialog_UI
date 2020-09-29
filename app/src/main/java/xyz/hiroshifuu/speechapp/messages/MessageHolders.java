@@ -779,7 +779,9 @@ public class MessageHolders {
 //            Log.d("MessageHolder", message.getLink());
             if (message.getLink().length() > 0) {
                 RichLinkView richLinkView = (RichLinkView) itemView.findViewById(R.id.richLinkView2);
-                richLinkView.setLink("https://www.google.com/maps/dir/Sembawang/National+University+of+Singapore,+21+Lower+Kent+Ridge+Rd,+Singapore+119077/@1.3706059,103.727092,12z/data=!3m1!4b1!4m14!4m13!1m5!1m1!1s0x31da13622c24a83d:0x500f7acaedaa6d0!2m2!1d103.8184954!2d1.4491107!1m5!1m1!1s0x31da1a56784202d9:0x488d08d6c1f88d6b!2m2!1d103.7763939!2d1.2966426!3e3", new ViewListener() {
+//                richLinkView.setLink("https://www.google.com/maps/dir/Sembawang/National+University+of+Singapore,+21+Lower+Kent+Ridge+Rd,+Singapore+119077/@1.3706059,103.727092,12z/data=!3m1!4b1!4m14!4m13!1m5!1m1!1s0x31da13622c24a83d:0x500f7acaedaa6d0!2m2!1d103.8184954!2d1.4491107!1m5!1m1!1s0x31da1a56784202d9:0x488d08d6c1f88d6b!2m2!1d103.7763939!2d1.2966426!3e3", new ViewListener() {
+//                Log.d("MessageHolder", message.getLink().replace(' ', '+'));
+                richLinkView.setLink(message.getLink().replace(' ', '+'), new ViewListener() {
 
                     @Override
                     public void onSuccess(boolean status) {

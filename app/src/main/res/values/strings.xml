@@ -42,8 +42,8 @@
     <string name="title_av_bus">BusChat</string>
     <string name="scan_help_info">Scan the QR code on bus, then you can login Speech APP!</string>
     <string name="hint_enter_a_message">Type a message…</string>
-    <string name="welcome_info">Hello, How can I assist you? Do you have queries related to? \n - Bus route \n -Surrounding places such as shopping malls, hospitals \n -Other rules and regulations</string>
-
+<!--    <string name="welcome_info">Hello, How can I assist you? Do you have queries related to? \n - Bus route \n -Surrounding places such as shopping malls, hospitals \n -Other rules and regulations</string>-->
+    <string name="welcome_info">Hello, I am your autonomus bus agent. How can I help you? What kind of information do you want to know?</string>
     <string name="chatbot_icon">chatbot icon</string>
     <string name="title_activity_maps">Map</string>
 </resources>
