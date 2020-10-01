@@ -268,7 +268,7 @@ public class SpeechActivity extends DemoMessagesActivity
 
         input.attachmentButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (PermissionHandler.checkPermission(that, PermissionHandler.RECORD_AUDIO)) {
+//                if (PermissionHandler.checkPermission(that, PermissionHandler.RECORD_AUDIO)) {
                     if (mSpeechManager == null) {
                         SetSpeechListener();
                     } else if (!mSpeechManager.ismIsListening()) {
@@ -278,9 +278,10 @@ public class SpeechActivity extends DemoMessagesActivity
                     //status_tv.setText(getString(R.string.you_may_speak));
                     input.attachmentButton.setClickable(false);
                     input.attachmentButton.getBackground().setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY);
-                } else {
-                    PermissionHandler.askForPermission(PermissionHandler.RECORD_AUDIO, that);
-                }
+//                }
+//                else {
+//                    PermissionHandler.askForPermission(PermissionHandler.RECORD_AUDIO, that);
+//                }
             }
         });
 
