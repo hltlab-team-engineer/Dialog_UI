@@ -1,0 +1,49 @@
+<resources>
+    <string name="app_name">BusChat</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="action_delete">Delete</string>
+    <string name="action_copy">Copy</string>
+    <string name="copied_message">Message copy finished!</string>
+
+    <string name="start_typing_status">Start typing status</string>
+    <string name="stop_typing_status">Stop typing status</string>
+    <string name="summaryServiceWs">Service based on the Kaldi GStreamer server. The server URL can be changed.</string>
+    <string name="labelRecognitionServiceWs">nus asr (fast recognition)</string>
+
+    <string name="keyImeAudioFormat" translatable="false">keyImeAudioFormat</string>
+    <string name="defaultAudioFormat" translatable="false">audio/x-raw</string>
+    <string name="keyImeAudioCues" translatable="false">keyImeAudioCues</string>
+
+    <string name="errorFailedGetServerUrl">ERROR: Failed to obtain the server URL</string>
+    <string name="keyWsServer" translatable="false">keyWsServer</string>
+    <string name="summaryWsServer" translatable="false">%1$s</string>
+
+    <string name="keyHttpServer" translatable="false">keyHttpServer</string>
+    <string name="defaultHttpServer" translatable="false">http://bark.phon.ioc.ee/speech-api/v1/recognize</string>
+    <string name="keyRespectLocale" translatable="false">keyRespectLocale</string>
+
+    <string name="titleWsServer">Server URL</string>
+
+
+    <string name="errorFailedLaunchIntent">ERROR: Intent is not serviced by any app</string>
+
+    <!-- Entries for the database, both apos and its escape character need escaping. -->
+    <string name="entryGrammarName1">[unrestricted input]</string>
+    <string name="entryGrammarDesc1">This grammar can be assigned to apps, where you always want to use unrestricted input regardless of the app\'\'s own settings</string>
+
+    <string name="record_audio_is_required">We will only use the Record Audio Permission in order to use the Speech to Text Feature</string>
+    <string name="start_listening">Start Listening</string>
+    <string name="stop_listening">Stop Listening</string>
+    <string name="no_results_found">No Matching Results</string>
+    <string name="destroied">Response</string>
+    <string name="you_may_speak">Listening...</string>
+    <string name="title_scan_qr_code">Scan QR code</string>
+    <string name="title_av_bus">BusChat</string>
+    <string name="scan_help_info">Scan the QR code on bus, then you can login Speech APP!</string>
+    <string name="hint_enter_a_message">Type a message…</string>
+<!--    <string name="welcome_info">Hello, How can I assist you? Do you have queries related to? \n - Bus route \n -Surrounding places such as shopping malls, hospitals \n -Other rules and regulations</string>-->
+    <string name="welcome_info">Hello, I am your autonomus bus agent. How can I help you? What kind of information do you want to know?</string>
+    <string name="chatbot_icon">chatbot icon</string>
+    <string name="title_activity_maps">Map</string>
+</resources>
